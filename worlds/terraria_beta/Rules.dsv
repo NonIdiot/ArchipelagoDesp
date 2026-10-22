@@ -1,5 +1,45 @@
 // For the logic to account for all skips, these rules would need to be made much more comprehensive
 
+// Researchsanity Items
+Can Research All Items;             ResearchItem | Item;                                // This one is present if totalChecksThere is <4.
+Can Research Stackable Items;       ResearchItem | Item;                                // This one is present if totalChecksThere is between 4-17 (inclusive).
+Can Research 1-To-Research Accessories; ResearchItem | Item;                            // The 1-To-Research ones are present if totalChecksThere is >=4.
+1_Research_Acc;                     ResearchGroup;                              ~@research_items | Can Research All Items | Can Research 1-To-Research Accessories;
+Can Research 1-To-Research Weapons; ResearchItem | Item;
+1_Research_Wep;                     ResearchGroup;                              ~@research_items | Can Research All Items | Can Research 1-To-Research Weapons;
+Can Research 1-To-Research Other Items; ResearchItem | Item;
+1_Research_Oth;                     ResearchGroup;                              ~@research_items | Can Research All Items | Can Research 1-To-Research Other Items;
+Can Research 2-To-Research Items;   ResearchItem | Item;                                // The rest are only present if totalChecksThere is >=18.
+2_Research;                         ResearchGroup;                              ~@research_items | Can Research All Items | Can Research Stackable Items | Can Research 2-To-Research Items;
+Can Research 3-To-Research Items;   ResearchItem | Item;
+3_Research;                         ResearchGroup;                              ~@research_items | Can Research All Items | Can Research Stackable Items | Can Research 3-To-Research Items;
+Can Research 5-To-Research Items;   ResearchItem | Item;
+5_Research;                         ResearchGroup;                              ~@research_items | Can Research All Items | Can Research Stackable Items | Can Research 5-To-Research Items;
+Can Research 10-To-Research Items;  ResearchItem | Item;
+10_Research;                        ResearchGroup;                              ~@research_items | Can Research All Items | Can Research Stackable Items | Can Research 10-To-Research Items;
+Can Research 15-To-Research Items;  ResearchItem | Item;
+15_Research;                        ResearchGroup;                              ~@research_items | Can Research All Items | Can Research Stackable Items | Can Research 15-To-Research Items;
+Can Research 20-To-Research Items;  ResearchItem | Item;
+20_Research;                        ResearchGroup;                              ~@research_items | Can Research All Items | Can Research Stackable Items | Can Research 20-To-Research Items;
+Can Research 25-To-Research Items;  ResearchItem | Item;
+25_Research;                        ResearchGroup;                              ~@research_items | Can Research All Items | Can Research Stackable Items | Can Research 25-To-Research Items;
+Can Research 30-To-Research Items;  ResearchItem | Item;
+30_Research;                        ResearchGroup;                              ~@research_items | Can Research All Items | Can Research Stackable Items | Can Research 30-To-Research Items;
+Can Research 50-To-Research Items;  ResearchItem | Item;
+50_Research;                        ResearchGroup;                              ~@research_items | Can Research All Items | Can Research Stackable Items | Can Research 50-To-Research Items;
+Can Research 99-To-Research Items;  ResearchItem | Item;
+99_Research;                        ResearchGroup;                              ~@research_items | Can Research All Items | Can Research Stackable Items | Can Research 99-To-Research Items;
+Can Research 100-To-Research Non-Tile Items; ResearchItem | Item;
+100_Research_NTl;                   ResearchGroup;                              ~@research_items | Can Research All Items | Can Research Stackable Items | Can Research 100-To-Research Non-Tile Items;
+Can Research 100-To-Research Tiles; ResearchItem | Item;
+100_Research_Til;                   ResearchGroup;                              ~@research_items | Can Research All Items | Can Research Stackable Items | Can Research 100-To-Research Tiles;
+Can Research 200-To-Research Items; ResearchItem | Item;
+200_Research;                       ResearchGroup;                              ~@research_items | Can Research All Items | Can Research Stackable Items | Can Research 200-To-Research Items;
+Can Research 400-To-Research Items; ResearchItem | Item;
+400_Research;                       ResearchGroup;                              ~@research_items | Can Research All Items | Can Research Stackable Items | Can Research 400-To-Research Items;
+Can Research Miscellaneous-Count Items; ResearchItem | Item;
+Misc_Research;                      ResearchGroup;                              ~@research_items | Can Research All Items | Can Research Stackable Items | Can Research Miscellaneous-Count Items;
+
 // Starting gear
 Copper Shortsword;
 Guide;                              Npc;
@@ -22,19 +62,45 @@ Lumberjack;                         Fargo;
 Deviantt NPC;                       Fargo;
 Squirrel;                           Fargo;
 Bug Net;                            ;                                           Merchant;  // TODO: add angler if fishing logic is enabled
+Any Bug Net;                        ;                                           Bug Net | Lavaproof Bug Net | Golden Bug Net;
+Any Bait;                           ;                                           Any Bug Net | (@fargo & #King Slime); // All eternity mode bosses drop crates. King Slime is Sphere 1, so it's the easiest to put here.
+Any Fishing Rod; // Unused and implied. At least, until Recipe Station Randomization comes in.
+Regular Fishing;                    ;                                           @fishing & Any Fishing Rod & Any Bait;
 Heavy Metal;                        Achievement | Early;
 Dye Trader;                         Npc;                                        @npc(4);
-Dye Hard;                           Achievement;                                Dye Trader;
+Dye Vat;                            ;                                           Dye Trader;
+Dye Hard;                           Achievement;                                Dye Vat;
 Demolitionist;                      Npc;                                        Merchant;
+Fallen Star;
+Mana Crystal;                       ;                                           Fallen Star;
 Lucky Break;                        Achievement | Early;
-Star Power;                         Achievement | Early;
+Star Power;                         Achievement | Early;                        Mana Crystal;
 You Can Do It!;                     Achievement | Early;
 Wulfrum Battery;                    Calamity;
 Wulfrum Armor;                      Calamity | Armor Minions(1);
+Furnace;
+Grass Seeds;                        ;                                           Dryad; // Technically possible with Extractinating Poo, which would require both an Extractinator, a food source (like fruits from trees), and a toilet. But it's VERY grindy.
+Copper Coin;
+Silver Coin;
+Gold Coin;
+Platinum Coin; // A bit grindy, UNLESS in Journey. Anything that requires this is either a Researchsanity location, or something the player is already late-game for already.
+Mushroom;
+Lens;
+Lesser Healing Potion;              ;                                           Regular Fishing | #King Slime | #Eye of Cthulhu | (@calamity & (#Desert Scourge | #Crabulon)) | Bottle | Merchant; // Also drops from Brain of Cthulhu, but doesn't from Eater of Worlds, so not putting it here.
+Lesser Mana Potion;                 ;                                           Regular Fishing | Merchant | Dungeon;
+Researchsanity - Lifeform Analyzer; Research | SphereOneResearch;               Lifeform Analyzer & 1_Research_Acc;
+Researchsanity - Dye Vat;           Research;                                   Dye Vat & 1_Research_Oth;
+Researchsanity - Bug Net;           Research;                                   Bug Net & 1_Research_Oth;
+Researchsanity - Copper Coin;       Research | SphereOneResearch;               Copper Coin & 100_Research_Til;
+Researchsanity - Silver Coin;       Research | SphereOneResearch;               Silver Coin & 100_Research_Til;
+Researchsanity - Gold Coin;         Research | SphereOneResearch;               Gold Coin & 100_Research_Til;
+Researchsanity - Platinum Coin;     Research | SphereOneResearch;               Platinum Coin & 100_Research_Til;
+Researchsanity - Lesser Healing Potion; Research | SphereOneResearch;           Lesser Healing Potion & 30_Research;
+Researchsanity - Lesser Mana Potion; Research;                                  Lesser Mana Potion & 30_Research;
 
 // Surface exploration
 Cactus;
-Unusual Survival Strategies;        Achievement | Early;
+Unusual Survival Strategies;        Achievement | Early;                        Bottled Water;
 Aglet;
 Radar;
 Wand of Sparking;
@@ -52,17 +118,81 @@ Enchanted Sword;
 Pretty in Pink;                     Achievement | Rare;
 Marathon Medalist;                  Achievement | Grindy;
 Angler;                             Npc;
-Fisherman's Pocket Guide;           ;                                           Angler | (Shimmer & Weather Radio);
-Weather Radio;                      ;                                           Angler | (Shimmer & Sextant);
-Sextant;                            ;                                           Angler | (Shimmer & Fisherman's Pocket Guide);
-Servant-in-Training;                Achievement | Fishing;                      Angler;
-\10 Fishing Quests;                 Achievement | Fishing;                      Angler;
-Trout Monkey;                       Achievement | Fishing;                      Angler;
-Glorious Golden Pole;               Achievement | Fishing;                      Angler;
-Fast and Fishious;                  Achievement | Fishing;                      Angler;
-Supreme Helper Minion!;             Achievement | Fishing;                      Angler;
+Fisherman's Pocket Guide;           ;                                           (Regular Fishing & Angler) | (Shimmer & Weather Radio) | (@fargo & (Banished Baron | #Duke Fishron)); // Last combination is quite grindy.
+Weather Radio;                      ;                                           (Regular Fishing & Angler) | (Shimmer & Sextant) | (@fargo & (Banished Baron | #Duke Fishron));
+Sextant;                            ;                                           (Regular Fishing & Angler) | (Shimmer & Fisherman's Pocket Guide) | (@fargo & (Banished Baron | #Duke Fishron));
+High Test Fishing Line;             ;                                           (Regular Fishing & Angler) | (Shimmer & Tackle Box) | (@fargo & (Banished Baron | #Duke Fishron)); // Last combination is quite grindy.
+Angler Earring;                     ;                                           (Regular Fishing & Angler) | (Shimmer & High Test Fishing Line) | (@fargo & (Banished Baron | #Duke Fishron));                                           
+Tackle Box;                         ;                                           (Regular Fishing & Angler) | (Shimmer & Angler Earring) | (@fargo & (Banished Baron | #Duke Fishron));                          
+Servant-in-Training;                Achievement | Fishing;                      (Regular Fishing & Angler);
+\10 Fishing Quests;                 Achievement | Fishing;                      (Regular Fishing & Angler);
+Trout Monkey;                       Achievement | Fishing;                      (Regular Fishing & Angler);
+Glorious Golden Pole;               Achievement | Fishing;                      (Regular Fishing & Angler);
+Fast and Fishious;                  Achievement | Fishing;                      (Regular Fishing & Angler);
+Supreme Helper Minion!;             Achievement | Fishing;                      (Regular Fishing & Angler);
 Water Walking Boots;
 Aquatic Heart;                      Calamity;
+Bottle;                             ;                                           Furnace;
+Bottled Water;                      ;                                           Bottle;
+Daybloom;
+Moonglow;
+Blinkroot; // While it usually only appears naturally underground, it can grow at any elevation.
+Waterleaf;
+Deathweed;
+Shiverthorn;
+Coral;
+Antlion Mandible; // Sphere One regardless of depth, as Antlions (the non-moving ones) can spawn on the surface during daytime.
+Diving Helmet; // A bit grindy to get. Oh well.
+Shark Fin; // Also grindy.
+Flipper;                            ;                                           Regular Fishing; // Technically possible with water chests, but not guaranteed per world.
+Breathing Reed;                     ;                                           Regular Fishing; // Same as Flipper.
+Frog Leg;                           ;                                           Regular Fishing;
+Sailfish Boots;                     ;                                           Regular Fishing;
+Jellyfish Necklace; // Yet again, pretty grindy. Pretty sure it can be found in Surface oceans, too, but that's not guaranteed.
+Double Cod;                         ;                                           Regular Fishing;
+Frost Minnow;                       ;                                           Regular Fishing;
+// All Blood Orb methods of getting potions should be considered Grindy.
+Ammo Reservation Potion;            ;                                           Bottled Water & ((Bottle & Double Cod & Moonglow) | (Blood Orb & Alchemy Table)); // Fishing Logic relevant for non-Blood Orb recipe.
+Archery Potion;                     ;                                           Bottled Water & ((Bottle & Daybloom) | (Blood Orb & Alchemy Table));
+Battle Potion;                      ;                                           Bottled Water & ((Bottle & Deathweed) | (Blood Orb & Alchemy Table));
+Builder Potion;                     ;                                           (Mechanic & Goblin Tinkerer) | (Bottled Water & ((Bottle & Blinkroot & Shiverthorn & Moonglow) | (Blood Orb & Alchemy Table))); // Not sure if Mechanic can be happy enough to sell these without Goblin Tinkerer, but just being safe.
+Flipper Potion;                     ;                                           Bottled Water & ((Bottle & Shiverthorn & Waterleaf) | (Blood Orb & Alchemy Table));
+Gills Potion;                       ;                                           Bottled Water & ((Bottle & Waterleaf & Coral) | (Blood Orb & Alchemy Table));
+Hunter Potion;                      ;                                           Bottled Water & ((Bottle & Daybloom & Blinkroot & Shark Fin) | (Blood Orb & Alchemy Table));
+Invisibility Potion;                ;                                           Bottled Water & ((Bottle & Blinkroot & Moonglow) | (Blood Orb & Alchemy Table));
+Magic Power Potion;                 ;                                           Bottled Water & ((Bottle & Moonglow & Deathweed & Fallen Star) | (Blood Orb & Alchemy Table));
+Mana Regeneration Potion;           ;                                           Bottled Water & ((Bottle & Moonglow & Daybloom & Fallen Star) | (Blood Orb & Alchemy Table));
+Mining Potion;                      ;                                           Bottled Water & ((Bottle & Antlion Mandible & Blinkroot) | (Blood Orb & Alchemy Table));
+Night Owl Potion;                   ;                                           Bottled Water & ((Bottle & Daybloom & Blinkroot) | (Blood Orb & Alchemy Table));
+Regeneration Potion;                ;                                           Bottled Water & ((Bottle & Daybloom & Mushroom) | (Blood Orb & Alchemy Table));
+Sonar Potion;                       ;                                           Bottled Water & ((Bottle & Waterleaf & Coral) | (Blood Orb & Alchemy Table)); // It's the same recipe as Gills Potion, yes.
+Swiftness Potion;                   ;                                           Bottled Water & ((Bottle & Blinkroot & Cactus) | (Blood Orb & Alchemy Table));
+Thorns Potion;                      ;                                           Bottled Water & ((Bottle & Deathweed & Cactus) | (Blood Orb & Alchemy Table));
+Warmth Potion;                      ;                                           Bottled Water & ((Bottle & Frost Minnow & Shiverthorn) | (Blood Orb & Alchemy Table));
+Water Walking Potion;               ;                                           Bottled Water & ((Bottle & Waterleaf & Shark Fin) | (Blood Orb & Alchemy Table));
+Researchsanity - Aglet;             Research | SphereOneResearch;               Aglet & 1_Research_Acc;
+Researchsanity - Radar;             Research | SphereOneResearch;               Radar & 1_Research_Acc;
+Researchsanity - Wand of Sparking;  Research | SphereOneResearch;               Wand of Sparking & 1_Research_Wep;
+Researchsanity - Cactus;            Research | SphereOneResearch;               Cactus & 100_Research_Til;
+Researchsanity - Ammo Reservation Potion; Research;                             Ammo Reservation Potion & 20_Research;
+Researchsanity - Archery Potion;    Research | SphereOneResearch;               Archery Potion & 20_Research;
+Researchsanity - Battle Potion;     Research | SphereOneResearch;               Battle Potion & 20_Research;
+Researchsanity - Builder Potion;    Research | SphereOneResearch;               Builder Potion & 20_Research;
+Researchsanity - Flipper Potion;    Research | SphereOneResearch;               Flipper Potion & 20_Research;
+Researchsanity - Gills Potion;      Research | SphereOneResearch;               Gills Potion & 20_Research;
+Researchsanity - Hunter Potion;     Research | SphereOneResearch;               Hunter Potion & 20_Research;
+Researchsanity - Invisibility Potion; Research | SphereOneResearch;             Invisibility Potion & 20_Research;
+Researchsanity - Magic Power Potion; Research | SphereOneResearch;              Magic Power Potion & 20_Research;
+Researchsanity - Mana Regeneration Potion; Research | SphereOneResearch;        Mana Regeneration Potion & 20_Research;
+Researchsanity - Mining Potion;     Research | SphereOneResearch;               Mining Potion & 20_Research;
+Researchsanity - Night Owl Potion;  Research | SphereOneResearch;               Night Owl Potion & 20_Research;
+Researchsanity - Regeneration Potion; Research | SphereOneResearch;             Regeneration Potion & 20_Research;
+Researchsanity - Sonar Potion;      Research | SphereOneResearch;               Sonar Potion & 20_Research;
+Researchsanity - Swiftness Potion;  Research | SphereOneResearch;               Swiftness Potion & 20_Research;
+Researchsanity - Thorns Potion;     Research | SphereOneResearch;               Thorns Potion & 20_Research;
+Researchsanity - Warmth Potion;     Research | SphereOneResearch;               Warmth Potion & 20_Research;
+Researchsanity - Water Walking Potion; Research | SphereOneResearch;            Water Walking Potion & 20_Research;
+// Wrath, Rage, and Heartreach Potions were excluded due to being Evil-specific.
 
 // Sky exploration
 Into Orbit;                         Achievement | Early;
@@ -73,6 +203,13 @@ Codebreaker Base;                   Calamity;
 Starfury;
 Celestial Magnet;
 Clumsy Slime;                       Pet;
+Damselfish;                         ;                                           Regular Fishing;
+Feather;
+Calming Potion;                     ;                                           Bottled Water & ((Bottle & Damselfish & Daybloom) | (Blood Orb & Alchemy Table));
+Featherfall Potion;                 ;                                           Bottled Water & ((Bottle & Daybloom & Blinkroot & Feather) | (Blood Orb & Alchemy Table));
+Researchsanity - Starfury;          Research | SphereOneResearch;               Starfury & 1_Research_Wep;
+Researchsanity - Calming Potion;    Research;                                   Calming Potion & 20_Research;
+Researchsanity - Featherfall Potion; Research | SphereOneResearch;              Featherfall Potion & 20_Research;
 
 // Underground
 Watch Your Step!;                   Achievement | Early;
@@ -85,16 +222,26 @@ Compass;
 Hey! Listen!;                       Achievement | Early;
 I Am Loot!;                         Achievement;
 Magic Mirror;
-Life Crystal;                       Health;
+Iron Ore; // Obtainable Sphere One. In rare cases (in which no surface Iron generates), not with Depth Randomization.
+Iron Bar;                           ;                                           Iron Ore & Furnace; // Also possible Sphere One, but in rare cases without Iron Ore generating OR Iron Bar loot, not without Depth Randomization.
+Chain;                              ;                                           Iron Bar & Anvil;
+Anvil;                              ;                                           Iron Bar;
+Sawmill;                            ;                                           Chain & Iron Bar;
+Loom;                               ;                                           Sawmill;
+Cobweb; // Likely logically relevant for Depth Randomization. Anything requiring Cobweb/Silk is not Sphere One if Depth Randomization is on.
+Silk;                               ;                                           Loom & Cobweb;
+Life Crystal;                       Health; // Note, in Fargo's Mutant Mod, the Nurse has a 20% chance to drop a Life Crystal when killed. Might be logically relevant for Depth Randomization.
 Heart Breaker;                      Achievement;                                #Life Crystal;
 Nurse;                              Npc;                                        Merchant;
 The Frequent Flyer;                 Not Calamity Getfixedboi | Achievement;     Nurse;
-Feast of Midas;                     Achievement | Rare;                         Bug Net;
+Feast of Midas;                     Achievement | Rare;                         Any Bug Net;
 Hold on Tight!;                     Achievement | Early;
 Feller of Evergreens;               Calamity;
-Gold Hammer;                        Hammer(55);
-Gold Pickaxe;                       Pickaxe(55);
-Gold Watch;
+Gold Ore;
+Gold Bar;                           ;                                           Gold Ore & Furnace;
+Gold Hammer;                        Hammer(55);                                 Gold Bar & Anvil;
+Gold Pickaxe;                       Pickaxe(55);                                Gold Bar & Anvil;
+Gold Watch;                         ;                                           Gold Bar; // Work Bench
 Like a Boss;                        Achievement;
 Hermes Boots;
 Jeepers Creepers;                   Achievement;
@@ -104,28 +251,75 @@ Deceiver of Fools;                  Achievement | Rare;
 Metal Detector;
 Dead Men Tell No Tales;             Achievement;
 Bulldozer;                          Achievement | Grindy;
+Extractinator;
+Silt;
+Glowing Mushroom;
+Armored Cavefish;                   ;                                           Regular Fishing; // Can be gotten in any non-Surface, non-Space layer.
+Stinkfish;                          ;                                           Regular Fishing;
+Specular Fish;                      ;                                           Regular Fishing; // Requires Underground or lower for Depth Randomization.
+Healing Potion;                     ;                                           (Lesser Healing Potion & Glowing Mushroom) | Regular Fishing | (Merchant & Wall of Flesh) | #Deerclops | #Skeletron | #Wall of Flesh | (@calamity & (#The Hive Mind | #The Perforators | #The Slime God));
+Mana Potion;                        ;                                           (Lesser Mana Potion & Glowing Mushroom) | Regular Fishing | (Merchant & Wall of Flesh);
+Dangersense Potion;                 ;                                           Bottled Water & ((Bottle & Shiverthorn & Cobweb) | (Blood Orb & Alchemy Table));
+Endurance Potion;                   ;                                           Bottled Water & ((Bottle & Armored Cavefish & Blinkroot) | (Blood Orb & Alchemy Table));
+Ironskin Potion;                    ;                                           Bottled Water & ((Bottle & Daybloom & Iron Ore) | (Blood Orb & Alchemy Table));
+Shine Potion;                       ;                                           Bottled Water & ((Bottle & Daybloom & Glowing Mushroom) | (Blood Orb & Alchemy Table));
+Spelunker Potion;                   ;                                           Bottled Water & ((Bottle & Blinkroot & Moonglow & Gold Ore) | (Blood Orb & Alchemy Table));
+Stink Potion;                       ;                                           Bottled Water & ((Bottle & Stinkfish & Deathweed) | (Blood Orb & Alchemy Table));
+Recall Potion;                      ;                                           Bottled Water & Bottle & Specular Fish & Daybloom;
+Wormhole Potion;                    ;                                           Bottled Water & Bottle & Specular Fish & Blinkroot;
+Researchsanity - Healing Potion;    Research | SphereOneResearch;               Healing Potion & 30_Research;
+Researchsanity - Mana Potion;       Research;                                   Mana Potion & 30_Research;
+Researchsanity - Dangersense Potion; Research | SphereOneResearch;              Dangersense Potion & 20_Research;
+Researchsanity - Endurance Potion;  Research;                                   Endurance Potion & 20_Research;
+Researchsanity - Ironskin Potion;   Research | SphereOneResearch;               Ironskin Potion & 20_Research;
+Researchsanity - Shine Potion;      Research | SphereOneResearch;               Shine Potion & 20_Research;
+Researchsanity - Spelunker Potion;  Research | SphereOneResearch;               Spelunker Potion & 20_Research;
+Researchsanity - Stink Potion;      Research;                                   Stink Potion & 20_Research;
+Researchsanity - Recall Potion;     Research;                                   Recall Potion & 20_Research;
+Researchsanity - Wormhole Potion;   Research;                                   Wormhole Potion & 20_Research;\
+// Red Potion excluded for... somewhat obvious reasons.
 
 // Cavern
-Obsidian;
+Obsidian;                           ;                                           @pickaxe(55);
 Obsidian Skull;                     ;                                           Obsidian;
 Raider's Talisman;                  Calamity;                                   Obsidian;
 There are Some Who Call Him...;     Achievement | Rare;
 Lava Charm;
-Demonite Ore;
+Demonite Ore;                       ;                                           @pickaxe(55) | (@fargo & Demolitionist & Plantera) | #Eye of Cthulhu | #Evil Boss; // Might be logically relevant for Depth Randomization, but then again you can summon Eye of Cthulhu or Eater of Worlds and get it that way.
 Demonite Bar;                       ;                                           Demonite Ore;
 Evil Sword;                         ;                                           Demonite Bar;
 Coin of Deceit;                     Calamity;                                   Demonite Bar | (Shimmer & Ruin Medallion);
+Researchsanity - Obsidian Skull;    Research | SphereOneResearch;               Obsidian Skull & 1_Research_Acc;
+Researchsanity - Coin of Deceit [Calamity]; Research | SphereOneResearch | Calamity; Coin of Deceit & 1_Research_Acc;
 
 // Underground Ice
-Ice Skates;
-Flinx Fur Coat;                     Armor Minions(1);
+Ice Skates; // Can be found in underground chests, OR fished for on the surface with Regular Fishing.
+Flinx Fur;
+Flinx Fur Coat;                     Armor Minions(1);                           Silk & Flinx Fur & Gold Bar;
+Slush;
 
 // Underground Desert
 Stormlion Mandible;                 Calamity;
 Golfer;                             Npc;
+Desert Fossil;
+Amber; // Sphere One without Depth Randomization. It needs either finding it in Underground Desert, or finding an Extractinator plus Silt/Slush/Fossil, which can only be found Underground.
+# party girl
 Party Girl;                         Npc;                                        @npc(14);
 Jolly Jamboree;                     Achievement;                                Party Girl;
 Cool Slime;                         Pet;                                        Party Girl;
+Silly Balloon;                      ;                                           Party Girl;
+Balloon Bed;                        ;                                           Silly Balloon & Silk & Sawmill;
+Balloon Bookcase;                   ;                                           Silly Balloon & Book & Sawmill;
+Balloon Dresser;                    ;                                           Silly Balloon & Sawmill;
+Balloon Piano;                      ;                                           Silly Balloon & Book & Bone & Sawmill;
+Balloon Work Bench;                 ;                                           Silly Balloon;
+Crate Potion;                       ;                                           Bottled Water & ((Bottle & Amber & Moonglow & Shiverthorn & Waterleaf) | (Blood Orb & Alchemy Table));
+Researchsanity - Balloon Bed;       ;                                           Balloon Bed;
+Researchsanity - Balloon Bookcase;  ;                                           Balloon Bookcase;
+Researchsanity - Balloon Dresser;   ;                                           Balloon Dresser;
+Researchsanity - Balloon Piano;     ;                                           Balloon Piano;
+Researchsanity - Balloon Work Bench; ;                                          Balloon Work Bench;
+Researchsanity - Crate Potion;      Research | SphereOneResearch;               Crate Potion & 20_Research;
 
 // Sunken Sea
 Sea Prism;                          Calamity;
@@ -140,7 +334,22 @@ Vine;
 Blade of Grass;                     ;                                           Stinger & Jungle Spores & Vine;
 Nature's Gift;
 Bezoar;
-Summoning Potion;                   Minions(1);
+Bottled Honey;                      ;                                           Bottle;
+Honey Block;
+Crispy Honey Block;                 ;                                           Honey Block; // And either lava or a Furnace. For Depth Randomization. Again.
+Variegated Lardfish;                ;                                           Regular Fishing;
+Fishing Potion;                     ;                                           Bottled Water & ((Bottle & Crispy Honey Block & Waterleaf) | (Blood Orb & Alchemy Table));
+Summoning Potion;                   Minions(1);                                 Bottled Water & ((Bottle & Variegated Lardfish & Moonglow) | (Blood Orb & Alchemy Table));
+Boomstick; // Can be gotten on surface Jungle by fishing. No logic needed.
+Researchsanity - Stinger;           Research | SphereOneResearch;               Stinger & 25_Research;
+Researchsanity - Jungle Spores;     Research | SphereOneResearch;               Jungle Spores & 25_Research;
+Researchsanity - Vine;              Research | SphereOneResearch;               Vine & 5_Research;
+Researchsanity - Blade of Grass;    Research | SphereOneResearch;               Blade of Grass & 1_Research_Wep;
+Researchsanity - Boomstick;         Research | SphereOneResearch;               Boomstick & 1_Research_Wep;
+Researchsanity - Honey Block;       Research | SphereOneResearch;               Honey Block & 100_Research_Til;
+Researchsanity - Crispy Honey Block; Research | SphereOneResearch;              Crispy Honey Block & 100_Research_Til;
+Researchsanity - Fishing Potion;    Research | SphereOneResearch;               Fishing Potion & 20_Research;
+Researchsanity - Summoning Potion;  Research;                                   Summoning Potion & 20_Research;
 
 // The Aether
 Aether;
@@ -153,7 +362,20 @@ Rock Bottom;                        Achievement;
 Obsidian Rose;
 Havocplate;                         Calamity;
 Magma Stone;
+Fireblossom; // Likely logically relevant for Depth Randomization. Have it require (Hell Elevation | Herb Bag).
+Can Access Hellforge; // Different from the Hellforge event, because picking it up has different requirements. Depth Randomization valuable too.
 Obsidian Skull Rose;                ;                                           Tinkerer's Workshop & Lava Charm & Obsidian Skull & Obsidian Rose;
+Biome Sight Potion;                 ;                                           Bottled Water & ((Bottle & Fireblossom & Blinkroot & Moonglow & Grass Seeds) | (Blood Orb & Alchemy Table));
+Gravitation Potion;                 ;                                           Bottled Water & ((Bottle & Fireblossom & Deathweed & Blinkroot & Feather) | (Blood Orb & Alchemy Table));
+Obsidian Skin Potion;               ;                                           Bottled Water & ((Bottle & Fireblossom & Waterleaf & Obsidian) | (Blood Orb & Alchemy Table));
+Gender Change Potion;               ;                                           Bottled Water & ((Bottle & Daybloom & Moonglow & Blinkroot & Waterleaf & Deathweed & Shiverthorn & Fireblossom) | (Blood Orb & Alchemy Table));
+Potion of Return;                   ;                                           ((Bottle & Recall Potion & Obsidifish) | (Bottled Water & Blood Orb & Alchemy Table));
+Researchsanity - Obsidian Skull Rose; Research;                                 Obsidian Skull Rose & 1_Research_Acc;
+Researchsanity - Biome Sight Potion; Research | SphereOneResearch;              Biome Sight Potion & 20_Research;
+Researchsanity - Gravitation Potion; Research | SphereOneResearch;              Gravitation Potion & 20_Research;
+Researchsanity - Obsidian Skin Potion; Research | SphereOneResearch;            Obsidian Skin Potion & 20_Research;
+Researchsanity - Gender Change Potion; Research | SphereOneResearch;            Gender Change Potion & 20_Research;
+Researchsanity - Potion of Return;  Research | SphereOneResearch;               Potion of Return & 20_Research;
 
 // Evil
 Smashing, Poppet!;                  Achievement;
@@ -161,11 +383,15 @@ Arms Dealer;                        Npc;
 Leading Landlord;                   Achievement | Not Getfixedboi;              (Nurse & Arms Dealer) | (Demolitionist & Tavernkeep) | (Zoologist & (Witch Doctor | Party Girl)) | (Painter & Dryad) | (Golfer & (Angler | Wizard)) | (Stylist & Dye Trader) | (Goblin Tinkerer & Mechanic) | (Clothier & Truffle) | (Party Girl & Wizard) | (Merchant & Tax Collector) | (Truffle & Guide) | (Pirate & Angler) | (Steampunker & Cyborg); // The logic is way more complex; this doesn't account for three NPC setups
 Completely Awesome;                 Achievement;                                Arms Dealer;
 Illegal Gun Parts;                  ;                                           Arms Dealer | (Shimmer & Flamethrower);
+Unholy Arrow; // Dropped from pots in hardmode, but craftable with Sphere 1 materials regardless.
+Researchsanity - Unholy Arrow;      Research | SphereOneResearch;               Unholy Arrow & 1_Research_Wep;
+Researchsanity - Illegal Gun Parts; Research;                                   Illegal Gun Parts & 1_Research_Oth;
 
 // Abyss
 Ink Bomb;                           Calamity;
 Abyss Layer 2;                      Calamity;                                   Sea King | Tinkerer's Workshop | Victide Armor | #Aquatic Scourge | (Aquatic Heart & Skeletron); // Sea King gives you immunity, Tinkerer's Workshop for diving gear, aquatic scourge for aquatic emblem, leviathan and anahita for Aquatic heart
-Planty Mush;                        Calamity;                                   Abyss Layer 2;
+Planty Mush;                        Calamity;                                   Abyss Layer 2 | Regular Fishing;
+Researchsanity - Planty Mush [Calamity]; Research | Calamity;                   Planty Mush & 1_Research_Oth;
 
 // King Slime
 Trojan Squirrel;                    Fargo | Location | Item;                    @health(1);
@@ -173,8 +399,23 @@ King Slime;                         Location | Item;                            
 Sticky Situation;                   Not Getfixedboi | Achievement | Time;
 The Cavalry;                        Achievement;
 Solidifier;                         ;                                           #King Slime;
+Slime Block;                        ;                                           Solidifier;
+Slime Block Wall;                   ;                                           Slime Block;
+Frozen Slime Block;                 ;                                           Solidifier & Slime Block;
+Slime Block Furniture;              ;                                           Solidifier & Slime Block;
+Slime Block Silk Furniture;         ;                                           Solidifier & Slime Block & Silk;
 Nerdy Slime;                        Pet;                                        #King Slime;
 Mutant NPC;                         Fargo;                                      #King Slime;
+Royal Gel;                          ;                                           #King Slime;
+Researchsanity - Solidifier;        Research | SphereOneResearch;               Solidifier & 1_Research_Oth;
+Researchsanity - Royal Gel;         Research | SphereOneResearch;               Royal Gel & 1_Research_Acc;
+Researchsanity - Slime Block;       Research | SphereOneResearch;               Slime Block & 100_Research_Til;
+Researchsanity - Slime Block Wall;  Research | SphereOneResearch;               Slime Block Wall & 400_Research;
+Researchsanity - Frozen Slime Block; Research | SphereOneResearch;              Frozen Slime Block & 100_Research_Til;
+Researchsanity - Slime Bed;         Research | SphereOneResearch;               Slime Block Silk Furniture & 1_Research_Oth;
+Researchsanity - Slime Chair;       Research | SphereOneResearch;               Slime Block Furniture & 1_Research_Oth;
+Researchsanity - Slime Door;        Research | SphereOneResearch;               Slime Block Furniture & 1_Research_Oth;
+Researchsanity - Slime Sofa;        Research | SphereOneResearch;               Slime Block Silk Furniture & 1_Research_Oth;
 
 // Desert Scourge
 Desert Scourge;                     Calamity | Location | Item;                 @health(1);
@@ -184,8 +425,11 @@ Reefclaw Hamaxe;                    Calamity | Hammer(60);                      
 Victide Armor;                      Calamity | Armor Minions(1);                Sea Remains;
 Sandstorm;                          ;                                           ~@calamity | Desert Scourge;
 Voltaic Jelly;                      Calamity | Minions(1);                      Desert Scourge | Jelly-Charged Battery; // Jelly-Charged Battery doesn't stack. This is the case for all Calamity minion accessory upgrades. This is also why they are exempt from being marked as Shimmerable.
+Researchsanity - Pearl Shard [Calamity]; Research | Calamity | SphereOneResearch; Pearl Shard & 25_Research;
+Researchsanity - Sea Remains [Calamity]; Research | Calamity | SphereOneResearch; Sea Remains & 25_Research;
 
 // Giant Clam
+// (Note to self: Add Sea King shop stuff here for Researchsanity. Include post-boss items!)
 Giant Clam;                         Calamity | Location | Item;                 ((@fargo & Sea Prism & Pearl Shard) | Desert Scourge) & @health(1);
 Sea King;                           Calamity;                                   Desert Scourge & Giant Clam;
 
@@ -193,10 +437,13 @@ Sea King;                           Calamity;                                   
 Blood Moon;                         ;                                           @health(1);
 Bloodbath;                          Achievement | Time;                         Blood Moon;
 Blood Orb;                          Calamity;                                   Blood Moon;
-Shark Tooth Necklace;               ;                                           Blood Moon;
-Til Death...;                       Achievement | Rare;  // No blood moon requirement—grooms and brides can spawn in graveyards
+Shark Tooth Necklace;               ;                                           @calamity | Blood Moon;
+Til Death...;                       Achievement | Rare;  // No blood moon requirement, as grooms and brides can spawn in graveyards
 Quiet Neighborhood;                 Achievement | Early;
+Chum Caster;                        ;                                           Blood Moon;
 Surly Slime;                        Pet;                                        Blood Moon;
+Researchsanity - Blood Orb [Calamity]; Research | Calamity;                     Blood Orb & 100_Research_NTl;
+Researchsanity - Shark Tooth Necklace; Research;                                Shark Tooth Necklace & 1_Research_Acc; // At Desperandos's request, Blood Moon stuff is to not be placed in Sphere One.
 
 // Eye of Cthulhu
 Eye of Cthulhu;                     Location | Item;                            @health(1);
@@ -204,9 +451,13 @@ Dryad;                              Npc;                                        
 Pumpkin Seeds;                      ;                                           Dryad;
 Pumpkin;                            ;                                           Pumpkin Seeds | (Shimmer & Cactus);
 Purification Powder;                ;                                           (~@getfixedboi & Dryad) | (Shimmer & Evil Powder);
+Corrupt Seeds; // Technically obtainable from Dryad, but you get it out of EoC's loot, so oh well.
 Mystic Slime;                       Pet;                                        Purification Powder;
 And Good Riddance!;                 Achievement | Grindy;                       Dryad;
 Acid Rain Tier 1;                   Calamity | Location | Item;                 ((@fargo & Abominationn NPC & Acid Rain Tier 1) | (Eye of Cthulhu | Wall of Flesh | Aquatic Scourge)) & @health(1);
+Researchsanity - Pumpkin Seed;      Research;                                   Pumpkin Seeds & 25_Research;
+Researchsanity - Pumpkin;           Research;                                   Pumpkin & 100_Research_Til; // Revisit for Holiday Logic
+Researchsanity - Purification Powder; Research;                                 Purification Powder & 99_Research;
 
 // Crabulon
 Cursed Coffin;                      Fargo | Location | Item;                    @health(1);
@@ -215,29 +466,62 @@ Crabulon;                           Calamity | Location | Item;                 
 // Evil Boss
 Evil Boss;                          Location | Item;                            @health(1);
 Evil Boss Part;                     ;                                           #Evil Boss;
-Evil Pickaxe;                       Pickaxe(65);                                Evil Boss Part;
-Obsidian Armor;                     Armor Minions(1);                           Obsidian & Evil Boss Part;
+Evil Pickaxe;                       Pickaxe(65);                                Evil Boss Part & Demonite Bar;
+Obsidian Armor;                     Armor Minions(1);                           Obsidian & Evil Boss Part & Can Access Hellforge;
 Tavernkeep;                         Npc;                                        Evil Boss;
 Old One's Army Tier 1;              Location | Item;                            Tavernkeep & @health(1);
 Meteorite;                          ;                                           (@fargo & Demolitionist & Plantera) | #Evil Boss | Evil Boss | (Shimmer & Meteorite Bar);
 Meteorite Bar;                      ;                                           Meteorite | (Shimmer & Meteor Staff);
 Meteor Hamaxe;                      Hammer(60);                                 Meteorite Bar;
 Hellforge;                          ;                                           @pickaxe(60);
-Hellstone;                          ;                                           (@fargo & Demolitionist & Plantera) | @pickaxe(65) | Wall of Flesh | (Shimmer & (Hellstone Bar | Infernal Suevite));
-Hellstone Bar;                      ;                                           Hellstone;
+Hellstone;                          ;                                           (@fargo & Demolitionist & Plantera) | @pickaxe(65) | Wall of Flesh | (Shimmer & (Hellstone Bar | Infernal Suevite)) | (@fargo & #Wall of Flesh); // Last combination is quite grindy.
+Hellstone Bar;                      ;                                           Hellstone | (@fargo & #Wall of Flesh); // Last combination is quite grindy.
 Fiery Greatsword;                   ;                                           Hellstone Bar;
 Molten Hamaxe;                      Hammer(70);                                 Hellstone Bar;
 Molten Pickaxe;                     Pickaxe(100);                               Hellstone Bar;
-Miner for Fire;                     Achievement;                                Molten Pickaxe;
-Hot Reels!;                         Achievement;                                Hellstone Bar & Bug Net;
+Miner for Fire;                     Achievement;                                @pickaxe(100);
 Brimstone Slag;                     Calamity;                                   @pickaxe(100);
+Scorched Bone;                      Calamity;                                   Molten Pickaxe | (@fargo & Lumberjack & Skeletron);
+// Whole lot of fishing logic here.
+Lavaproof Bug Net;                  ;                                           Hellstone Bar & Bug Net;
+Golden Bug Net;                     ;                                           (Angler & Regular Fishing) | (@fargo & Merchant & Angler & Wall of Flesh) | (@fargo & #Duke Fishron); // Banished Baron is a 2% chance.
+Hotline Fishing Hook;               ;                                           (Angler & Regular Fishing) | (@fargo & Merchant & Angler & Wall of Flesh) | (@fargo & (#Duke Fishron | #Banished Baron));
+Golden Fishing Rod;                 ;                                           (Angler & Regular Fishing) | (@fargo & Merchant & Angler & Wall of Flesh) | (@fargo & (#Duke Fishron | #Banished Baron));    // | (@calamity & Angler) is dead sorry. Anyway, Banished Baron is a 0.67% chance.
+Angler Tackle Bag;                  ;                                           High Test Fishing Line & Angler Earring & Tackle Box;
+Lavaproof Fishing Hook;             ;                                           Obsidian Crate | (@fargo & #Wall of Flesh); // Last combination is quite grindy.
+Lavaproof Tackle Bag;               ;                                           Tinkerer's Workshop & ((@fargo & #Duke Fishron) | (Merchant & Angler));
+Any Lava-Fishing Bug Net;           ;                                           Lavaproof Bug Net | Golden Bug Net;
+Any Lava-Fishing Bait;              ;                                           Any Lava-Fishing Bug Net;
+Any Lava-Fishing Rod;               ;                                           Hotline Fishing Hook | Golden Fishing Rod;
+Any Lava-Fishing Accessory;         ;                                           Lavaproof Fishing Hook | Lavaproof Tackle Bag | Angler Enchantment | Trawler Soul | Soul of Dimensions | Soul of Eternity;
+Lava Fishing;                       ;                                           @fishing & (Any Lava-Fishing Bug Net | (Regular Fishing & (Any Lava-Fishing Rod | Any Lava-Fishing Accessory))); // Doesn't have to be in Hell, just in Lava. So the Depth Logic should be (existing stuff & (Lava Bucket)).
+Hot Reels!;                         Achievement;                                Lava Fishing;
+Flarefin Koi;                       ;                                           Lava Fishing; // Doesn't actually need to be in Hell.
+Obsidifish;                         ;                                           Lava Fishing; // Doesn't actually need to be in Hell.
+Obsidian Crate;                     ;                                           Lava Fishing; // Needs Hell access in Depth Randomization.
+Inferno Potion;                     ;                                           (Can Access Shadow Chests In Hell) | (Bottled Water & ((Bottle & Flarefin Koi & Obsidifish & Fireblossom) | (Blood Orb & Alchemy Table)));
+Researchsanity - Obsidian Outlaw Hat; Research;                                 Obsidian Armor & 1_Research_Oth;
+Researchsanity - Obsidian Longcoat; Research;                                   Obsidian Armor & 1_Research_Oth;
+Researchsanity - Obsidian Pants;    Research;                                   Obsidian Armor & 1_Research_Oth;
+Researchsanity - Meteorite;         Research;                                   Meteorite & 100_Research_Til;
+Researchsanity - Meteorite Bar;     Research;                                   Meteorite Bar & 25_Research;
+Researchsanity - Meteor Hamaxe;     Research;                                   Meteor Hamaxe & 1_Research_Wep;
+Researchsanity - Hellforge;         Research;                                   Hellforge & 1_Research_Oth;
+Researchsanity - Hellstone;         Research;                                   Hellstone & 100_Research_Til;
+Researchsanity - Hellstone Bar;     Research;                                   Hellstone Bar & 25_Research;
+Researchsanity - Volcano;           Research;                                   Fiery Greatsword & 1_Research_Wep;
+Researchsanity - Molten Hamaxe;     Research;                                   Molten Hamaxe & 1_Research_Wep;
+Researchsanity - Molten Pickaxe;    Research;                                   Molten Pickaxe & 1_Research_Wep;
+Researchsanity - Brimstone Slag [Calamity]; Research | Calamity;                Brimstone Slag & 100_Research_Til;
+Researchsanity - Scorched Bone [Calamity]; Research | Calamity;                 Brimstone Slag & 100_Research_Til;
+Researchsanity - Inferno Potion;    Research;                                   Inferno Potion & 20_Research;
 
 // Goblin Army
 Goblin Army;                        Location | Item;                            @health(1);
 Goblin Tinkerer;                    Npc;                                        Goblin Army;
 Abominationn NPC;                   Fargo;                                      Goblin Army;
 Tinkerer's Workshop;                ;                                           Goblin Tinkerer;
-Mana Flower;                        ;                                           (Tinkerer's Workshop & Nature's Gift) | (@calamity & (Shimmer & Ethereal Talisman));
+Mana Flower;                        ;                                           (Tinkerer's Workshop & Nature's Gift & Mana Potion) | (@calamity & (Shimmer & Ethereal Talisman));
 Silencing Sheath;                   Calamity;                                   (Tinkerer's Workshop & Demonite Bar & Evil Boss Part) | (Shimmer & Dark Matter Sheath);
 Rocket Boots;                       ;                                           Goblin Tinkerer;
 Spectre Boots;                      ;                                           Tinkerer's Workshop & Hermes Boots & Rocket Boots;
@@ -249,17 +533,37 @@ GPS;                                ;                                           
 Goblin Tech;                        ;                                           Tinkerer's Workshop & DPS Meter & Stopwatch & Metal Detector;
 Fish Finder;                        ;                                           Tinkerer's Workshop & Fisherman's Pocket Guide & Weather Radio & Sextant;
 Boots of the Hero;                  Achievement | Crafting;                     Terraspark Boots;
-Diving Gear;                        ;                                           Tinkerer's Workshop;
+Diving Gear;                        ;                                           Tinkerer's Workshop & Diving Helmet & Flipper;
+Frog Flipper;                       ;                                           Tinkerer's Workshop & Flipper & Frog Leg;
+Jellyfish Diving Gear;              ;                                           Tinkerer's Workshop & Diving Gear & Jellyfish Necklace;
+Arctic Diving Gear;                 ;                                           Tinkerer's Workshop & Jellyfish Diving Gear & Ice Skates;
+Researchsanity - Tinkerer's Workshop; Research;                                 Tinkerer's Workshop & 1_Research_Oth;
+Researchsanity - Mana Flower;       Research;                                   Mana Flower & 1_Research_Acc;
+Researchsanity - Silencing Sheath [Calamity]; Research | Calamity;              Silencing Sheath & 1_Research_Acc;
+Researchsanity - Rocket Boots;      Research;                                   Rocket Boots & 1_Research_Acc;
+Researchsanity - Spectre Boots;     Research;                                   Spectre Boots & 1_Research_Acc;
+Researchsanity - Lightning Boots;   Research;                                   Lightning Boots & 1_Research_Acc;
+Researchsanity - Frostspark Boots;  Research;                                   Frostspark Boots & 1_Research_Acc;
+Researchsanity - Lava Waders;       Research;                                   Lava Waders & 1_Research_Acc;
+Researchsanity - Terraspark Boots;  Research;                                   Terraspark Boots & 1_Research_Acc;
+Researchsanity - GPS;               Research;                                   GPS & 1_Research_Acc;
+Researchsanity - Goblin Tech;       Research;                                   Goblin Tech & 1_Research_Acc;
+Researchsanity - Fish Finder;       Research;                                   Fish Finder & 1_Research_Acc;
+Researchsanity - Diving Gear;       Research;                                   Diving Gear & 1_Research_Acc;
 
 // Queen Bee
 Where's My Honey?;                  Achievement;
 Queen Bee;                          Location | Item;                            @health(1);
 Bee Keeper;                         ;                                           #Queen Bee;
 Bee Wax;                            ;                                           #Queen Bee;
+Beenade;                            ;                                           #Queen Bee;
 Bee Armor;                          Armor Minions(2);                           Bee Wax;
 Not the Bees!;                      Achievement;                                #Queen Bee & Bee Armor;
 Witch Doctor;                       Npc;                                        Queen Bee;
 Pygmy Necklace;                     Minions(1);                                 Witch Doctor | (@calamity & Statis' Blessing);
+Researchsanity - Bee Wax;           Research | SphereOneResearch;               Bee Wax & 25_Research;
+Researchsanity - Beenade;           Research | SphereOneResearch;               Beenade & 99_Research;
+Researchsanity - Pygmy Necklace;    Research;                                   Pygmy Necklace & 1_Research_Acc;
 
 // Calamity Evil Boss
 The Hive Mind;                      Calamity | Location | Item;                 @health(1);
@@ -271,6 +575,11 @@ Aerial Hamaxe;                      Calamity | Hammer(70);                      
 Skyfringe Pickaxe;                  Calamity | Pickaxe(75);                     Aerialite Bar;
 Aerospec Armor;                     Calamity | Armor Minions(1);                Aerialite Bar;
 Feather Crown;                      Calamity;                                   Aerialite Bar | (Shimmer & Moonstone Crown);
+Researchsanity - Aerialite Ore [Calamity]; Research | Calamity;                 Aerialite Ore & 100_Research_Til;
+Researchsanity - Aerialite Bar [Calamity]; Research | Calamity;                 Aerialite Bar & 25_Research;
+Researchsanity - Aerial Hamaxe [Calamity]; Research | Calamity;                 Aerial Hamaxe & 1_Research_Wep;
+Researchsanity - Skyfringe Pickaxe [Calamity]; Research | Calamity;             Skyfringe Pickaxe & 1_Research_Wep;
+Researchsanity - Feather Crown [Calamity]; Research | Calamity;                 Feather Crown & 1_Research_Acc;
 
 // Skeletron
 Skeletron;                          Location | Item;                            (~@npc_rando | ((@fargo & Mutant NPC & Skeletron) | Clothier)) & @health(1); // If NPCs are shuffled, Skeletron cannot be summoned if Post-Skeletron is received & The Clothier is not
@@ -287,7 +596,7 @@ Black Mirror;                       Achievement | Fishing | Crafting;           
 Bewitching Table;                   Minions(1);                                 (@fargo & Witch Doctor & Skeletron) | Dungeon | (Witch Doctor & Wizard) | (Shimmer & Alchemy Table);
 Alchemy Table;                      ;                                           Dungeon | (Shimmer & Bewitching Table);
 Mechanic;                           Npc;                                        Dungeon;
-Wire;                               ;                                           Mechanic | (@calamity & (Shimmer & Electrician's Glove));
+Wire;                               ;                                           (Mechanic & (~@npc_rando | (@fargo & Dungeon))) | (@calamity & (Shimmer & Electrician's Glove)) | #Mechanic; // In Fargo's Mutant Mod, you can kill the Mechanic for a 20% chance to get Wire. Might be logically relevant for Depth Randomization.
 Decryption Computer;                Calamity;                                   Mysterious Circuitry & Dubious Plating & Wire;
 Actuator;                           ;                                           Mechanic;
 Muramasa;                           ;                                           Dungeon;
@@ -295,9 +604,34 @@ Cobalt Shield;                      ;                                           
 Obsidian Shield;                    ;                                           Tinkerer's Workshop & Cobalt Shield & Obsidian Skull;
 Elder Slime;                        Pet;                                        Skeletron & Dungeon;
 Bandit;                             Calamity;                                   Skeletron;
+M1 Garand;                          Calamity;                                   Skeletron & Arms Dealer;
+Counter Scarf;                      Calamity;                                   Clothier;
+Golden Key;                         ;                                           Clothier | Dungeon;
+Shadow Key;                         ;                                           Golden Key & Dungeon;
+Book;                               ;                                           Dungeon; // Technically possible to get SOME before Dungeon access, but not consistent enough to be in-logic.
+Can Access Shadow Chests In Hell;   ;                                           Shadow Key; // Depth Logic here.
+Titan Potion;                       ;                                           Bottled Water & ((Bottle & Bone & Deathweed & Shiverthorn) | (Blood Orb & Alchemy Table));
+Researchsanity - Bone;              Research;                                   Bone & 99_Research;
+Researchsanity - Mirage Mirror [Calamity]; Research | Calamity;                 Mirage Mirror & 1_Research_Acc;
+Researchsanity - Tally Counter;     Research;                                   Tally Counter & 1_Research_Acc;
+Researchsanity - R.E.K. 3000;       Research;                                   R.E.K. 3000 & 1_Research_Acc;
+Researchsanity - PDA;               Research;                                   PDA & 1_Research_Acc;
+Researchsanity - Cell Phone;        Research;                                   Cell Phone & 1_Research_Acc;
+Researchsanity - Bewitching Table;  Research;                                   Bewitching Table & 1_Research_Oth;
+Researchsanity - Alchemy Table;     Research;                                   Alchemy Table & 1_Research_Oth;
+Researchsanity - Wire;              Research;                                   Wire & 100_Research_NTl;
+Researchsanity - Decryption Computer [Calamity]; Research | Calamity;           Decryption Computer & 1_Research_Oth;
+Researchsanity - Actuator;          Research;                                   Actuator & 50_Research;
+Researchsanity - Muramasa;          Research;                                   Muramasa & 1_Research_Wep;
+Researchsanity - Cobalt Shield;     Research;                                   Cobalt Shield & 1_Research_Acc;
+Researchsanity - Obsidian Shield;   Research;                                   Obsidian Shield & 1_Research_Acc;
+Researchsanity - M1 Garand [Calamity]; Research | Calamity;                     M1 Garand & 1_Research_Wep;
+Researchsanity - Counter Scarf [Calamity]; Research | Calamity;                 Counter Scarf & 1_Research_Acc;
+Researchsanity - Titan Potion;      Research;                                   Titan Potion & 20_Research;
 
 // Deerclops
-Deerclops;                          Location | Item;                            @health(1);
+Deer Thing;                         ;                                           Flinx Fur & Demonite Ore & Lens;
+Deerclops;                          Location | Item;                            Deer Thing & @health(1);
 
 // The Slime God
 The Slime God;                      Calamity | Location | Item;                 ((@fargo & Mutant NPC & The Slime God) | Blighted Gel) & @health(1);
@@ -315,6 +649,7 @@ Deviating Energy;                   Fargo;                                      
 Wall of Flesh;                      Location | Item(Hardmode) | Goal;           ((@fargo & Mutant NPC & Wall of Flesh) | Guide) & @health(1);
 # wall_of_flesh
 Pwnhammer;                          Hammer(80);                                 #Wall of Flesh;
+Badger's Hat;                       ;                                           #Wall of Flesh & #Eye of Cthulhu; // might need testing to see if this works without boss flags.
 Emblem;                             ;                                           #Wall of Flesh | (Shimmer & (Avenger Emblem | (@calamity & (Mechanical Glove | Celestial Emblem | Statis' Blessing))));
 Fast Clock;                         ;                                           Wall of Flesh | (Shimmer & Trifold Map);
 Wizard;                             Npc;                                        Wall of Flesh;
@@ -353,7 +688,7 @@ Hallow;                             ;                                           
 Pixie Dust;                         ;                                           Hallow | (Shimmer & (Meteor Staff | Holy Water));
 Holy Water;                         ;                                           (Pixie Dust & Hallowed Seeds) | (@calamity & Shimmer & Statis' Blessing);
 Unicorn Horn;                       ;                                           Hallow;
-Crystal Shard;                      ;                                           Hallow;
+Crystal Shard;                      ;                                           Hallow; // Requires either fishing logic or Cavern in terms of Depth Randomization, as they can be obtained from Divine Crates or growing naturally in Cavern or lower. (Technically you can get it on the surface with Remix seed, but that's OOL methinks.)
 Axe of Purity;                      Calamity;                                   Feller of Evergreens & Purification Powder & Pixie Dust & Crystal Shard;
 Soul of Light;                      ;                                           Hallow | (@calamity & #Queen Slime) | (Shimmer & (Light Disc | Meteor Staff));
 Meteor Staff;                       ;                                           Hardmode Anvil & Meteorite Bar & Pixie Dust & Soul of Light;
@@ -377,6 +712,24 @@ Hardmode Giant Clam;                Calamity | Location | Item;                 
 Truffle;                            Npc;                                        Wall of Flesh;
 It Can Talk?!;                      Achievement;                                Truffle;
 The First Shadowflame;              Calamity | Minions(1);                      Goblin Army | Wall of Flesh;
+Evasion Scarf;                      Calamity;                                   Counter Scarf & Soul of Light & Soul of Night & Silk;
+Greater Healing Potion;             ;                                           ((Bottle | Alchemy Table) & Bottled Water & Pixie Dust & Crystal Shard) | #Duke Fishron | #Empress of Light | #Golem | #Lunatic Cultist | #Plantera | #Queen Slime | #Skeletron Prime | #The Destroyer | #The Twins | (@calamity & (#Cryogen | #Aquatic Scourge | #Brimstone Elemental | #Calamitas Clone | #Leviathan and Anahita | #Astrum Aureus | #The Plaguebringer Goliath | #Ravager));
+Greater Mana Potion;                ;                                           Wall of Flesh | Wizard;
+Prismite;                           ;                                           Hallow | (Shimmer & Lifeforce Potion); // Needs testing on if Shimmer works with this method.
+Princess Fish;                      ;                                           Hallow | (Shimmer & Love Potion); // Needs testing on if Shimmer works with this method.
+Chaos Fish;                         ;                                           Hallow | (Shimmer & Teleportation Potion); // Needs testing on if Shimmer works with this method. Also needs Underground for Depth Randomization.
+Lifeforce Potion;                   ;                                           Bottled Water & ((Bottle & Prismite & Moonglow & Shiverthorn & Waterleaf) | (Blood Orb & Alchemy Table));
+Love Potion;                        ;                                           Bottled Water & ((Bottle & Princess Fish & Shiverthorn) | (Blood Orb & Alchemy Table));
+Teleportation Potion;               ;                                           Bottled Water & (Bottle & Chaos Fish & Fireblossom); // Likely possible without Chaos Fish, but eh.
+Researchsanity - Badger's Hat;      Research | SphereOneResearch;               Badger's Hat & 1_Research_Oth;
+Researchsanity - Greater Healing Potion; Research;                              Greater Healing Potion & 30_Research;
+Researchsanity - Starblight Soot [Calamity]; Research | Calamity;               Starblight Soot & 100_Research_NTl;
+Researchsanity - Titan Heart [Calamity]; Research | Calamity;                   Titan Heart & 3_Research;
+Researchsanity - Prismite;          Research;                                   Prismite & 3_Research;
+Researchsanity - Princess Fish;     Research;                                   Princess Fish & 3_Research;
+Researchsanity - Lifeforce Potion;  Research;                                   Lifeforce Potion & 20_Research;
+Researchsanity - Love Potion;       Research;                                   Love Potion & 20_Research;
+Researchsanity - Teleportation Potion; Research;                                Teleportation Potion & 20_Research;
 
 // Pirate Invasion
 Pirate Invasion;                    Location | Item;                            ((@fargo & Abominationn NPC & Pirate Invasion) | Wall of Flesh) & @health(1);
@@ -423,7 +776,7 @@ Skeletron Prime;                    Location | Item | Mech Boss;                
 # mechanical_bosses
 
 // The Twins
-Soul of Sight;                      ;                                           #The Twins | Avenger Emblem | (@calamity & (Mechanical Glove | Celestial Emblem));
+Soul of Sight;                      ;                                           #The Twins | (Shimmer & Avenger Emblem) | (@calamity & (Mechanical Glove | Celestial Emblem));
 Steampunker;                        Npc;                                        @mech_boss(1) | @getfixedboi;
 Hammush;                            Hammer(80);                                 Truffle & @mech_boss(1);
 Rainbow Rod;                        ;                                           Hardmode Anvil & Crystal Shard & Unicorn Horn & Pixie Dust & Soul of Light & Soul of Sight;
@@ -468,6 +821,7 @@ Chlorophyte Armor;                  ;                                           
 True Excalibur;                     ;                                           Hardmode Anvil & Excalibur & Chlorophyte Bar;
 Chlorophyte Pickaxe;                Pickaxe(200);                               Hardmode Anvil & Chlorophyte Bar;
 Chlorophyte Warhammer;              Hammer(90);                                 Hardmode Anvil & Chlorophyte Bar;
+Researchsanity - Avenger Emblem;    Research;                                   Avenger Emblem & 1_Research_Acc;
 
 // Calamitas Clone
 Lifelight;                          Fargo | Location | Item;                    ((Mutant NPC & Lifelight) | (Hardmode Anvil & Hallow)) & @health(3);
@@ -511,12 +865,17 @@ Rainbows and Unicorns;              Achievement | Rare;                         
 Perennial Ore;                      Calamity;                                   Plantera | (Shimmer & Perennial Bar);
 Perennial Bar;                      Calamity;                                   (Hardmode Forge & Perennial Ore) | Fleshy Geode | Necromantic Geode | (Shimmer & Life Alloy);
 Beastial Pickaxe;                   Calamity | Pickaxe(200);                    Hardmode Anvil & Perennial Bar;
+Super Mana Potion;                  ;                                           (Bottle & Greater Mana Potion & Fallen Star & Ectoplasm) | (@fargo & Wizard);
 
 // Solar Eclipse
 Temple Raider;                      Achievement;                                #Plantera;
 Lihzahrd Temple;                    ;                                           #Plantera | (Plantera & Actuator) | @pickaxe(210);
 Lihzahrd Furniture;                 ;                                           Lihzahrd Temple;
+Lihzahrd Furnace;                   ;                                           Lihzahrd Temple;
 Bohldohr;                           Calamity;                                   Lihzahrd Temple;
+Lihzahrd Brick;                     ;                                           @pickaxe(210) | (Lihzahrd Furniture & Golem) | Bohldohr; // i BET you can get these with shimmering something.
+Lihzahrd Platform;                  ;                                           Lihzahrd Brick;
+Lihzahrd Basic Furniture;           ;                                           Lihzahrd Brick & Lihzahrd Furnace;
 Solar Eclipse;                      ;                                           ((@fargo & ((Witch Doctor & Golem) | (Abominationn NPC & @mech_boss(1)))) | (Wall of Flesh & (Lihzahrd Temple | (@time & @mech_boss(1))))) & @health(2);
 Broken Hero Sword;                  ;                                           Solar Eclipse & Plantera & (@mech_boss(3) | @fargo);
 Terra Blade;                        ;                                           Hardmode Anvil & True Night's Edge & True Excalibur & Broken Hero Sword & (~@calamity | Living Shard);
@@ -525,11 +884,18 @@ Neptune's Shell;                    ;                                           
 Kill the Sun;                       Achievement;                                Solar Eclipse;
 Solar Veil;                         Calamity;                                   Solar Eclipse & Calamitas Clone;
 Vampiric Talisman;                  Calamity;                                   Hardmode Anvil & Raider's Talisman & Eye of Cthulhu & Solar Veil;
+Researchsanity - Lihzahrd Brick;    Research;                                   Lihzahrd Brick & 100_Research_Til;
+Researchsanity - Lihzahrd Platform; Research;                                   Lihzahrd Platform & 200_Research;
+Researchsanity - Lihzahrd Chair;    Research;                                   Lihzahrd Basic Furniture & 1_Research_Oth;
+Researchsanity - Lihzahrd Door;     Research;                                   Lihzahrd Basic Furniture & 1_Research_Oth;
+Researchsanity - Lihzahrd Lamp;     Research;                                   Lihzahrd Basic Furniture & 1_Research_Oth;
+Researchsanity - Lihzahrd Toilet;   Research;                                   Lihzahrd Basic Furniture & 1_Research_Oth;
 
 // Great Sand Shark
 Great Sand Shark;                   Calamity | Location | Item;                 ((@fargo & Abominationn NPC & Cragmaw Mire) | (#Plantera | (Hardmode Anvil & Forbidden Fragment & Core of Calamity))) & @health(3);
 Grand Scale;                        Calamity;                                   #Great Sand Shark | (Shimmer & Sand Shark Tooth Necklace);
 Sand Shark Tooth Necklace;          Calamity;                                   (Tinkerer's Workshop & Shark Tooth Necklace & Avenger Emblem & Grand Scale) | (@getfixedboi & #Desert Scourge);
+Researchsanity - Sand Shark Tooth Necklace; Research | Calamity;                Sand Shark Tooth Necklace & 1_Research_Acc;
 
 // Leviathan and Anahita
 Leviathan and Anahita;              Calamity | Location | Item;                 @health(3);
@@ -546,7 +912,6 @@ Starbuster Core;                    Calamity | Minions(1);                      
 Golem;                              Location | Item | Goal;                     ((@fargo & Mutant NPC & Golem) | (Wall of Flesh & Lihzahrd Temple)) & @health(3);
 # golem
 Picksaw;                            Pickaxe(210);                               #Golem;
-Lihzahrd Brick;                     ;                                           @pickaxe(210) | (Lihzahrd Furniture & Golem) | Bohldohr;
 Scoria Ore;                         Calamity;                                   (Abyss Layer 2 & (Golem | @pickaxe(210))) | (Shimmer & (Astral Ore | Luminite | Scoria Bar));
 Scoria Bar;                         Calamity;                                   (Hardmode Forge & Scoria Ore) | Fleshy Geode | Necromantic Geode | (Shimmer & (Life Alloy | Sigil of Calamitas | Fire Gauntlet));
 Seismic Hampick;                    Calamity | Pickaxe(210) | Hammer(95);       Hardmode Anvil & Scoria Bar;
@@ -612,6 +977,7 @@ Astrum Deus;                        Calamity | Location | Item | Goal;          
 # lunatic_cultist
 # astrum_deus
 Ancient Manipulator;                ;                                           #Lunatic Cultist;
+Researchsanity - Ancient Manipulator; Research;                                 Ancient Manipulator & 1_Research_Oth;
 
 // Lunar Events
 Lunar Events;                       Location | Item;                            ((@fargo & Abominationn NPC & Lunar Events) | #Lunatic Cultist) & @health(4);
@@ -622,6 +988,7 @@ Stardust Fragment;                  ;                                           
 Statis' Curse;                      Calamity;                                   (Ancient Manipulator & Statis' Blessing & The First Shadowflame & Stardust Fragment) | Nucleogenesis;
 Meld Blob;                          Calamity;                                   #Lunar Events | #Astrum Deus;
 Dark Matter Sheath;                 Calamity;                                   (Ancient Manipulator & Silencing Sheath & Ruin Medallion & Meld Blob) | (Shimmer & Eclipse Mirror);
+Super Healing Potion;               ;                                           ((Bottle | Alchemy Table) & Greater Healing Potion & Fragment) | #Moon Lord | (@calamity & (#Astrum Deus | #Profaned Guardians | #Dragonfolly));
 
 // Astrum Deus
 Astral Ore;                         Calamity;                                   (Astral Infection & Astrum Deus) | (Shimmer & Astral Bar); // No pick needed; Astral Slime drops it
@@ -650,11 +1017,14 @@ Normality Relocator;                Calamity;                                   
 Unholy Essence;                     Calamity;                                   Moon Lord | #Providence, the Profaned Goddess | (@getfixedboi & Plantera);
 Necroplasm;                         Calamity;                                   (Moon Lord & (Dungeon | Wall of Flesh)) | #Polterghast | (Shimmer & #The Devourer of Gods);
 Fragments of Another World;         Calamity | Minions(1);                      Hardmode Anvil & Exodium Cluster & Navyplate & Necroplasm;
-Arctic Diving Gear;                 ;                                           Tinkerer's Workshop;
 Abyssal Diving Gear;                Calamity;                                   Hardmode Anvil & Arctic Diving Gear & Skeletron & Depth Cells & Lumenyl;
 Mollusk Husk;                       Calamity;                                   Wall of Flesh;
 Abyssal Diving Suit;                Calamity;                                   Hardmode Anvil & Abyssal Diving Gear & Skeletron & Luminite Bar & Mollusk Husk;
 Abyss Layer 4;                      Calamity;                                   Abyss Layer 2 & Abyssal Diving Suit; 
+Researchsanity - Luminite;          Research;                                   Luminite & 100_Research_Til;
+Researchsanity - Luminite Hamaxe;   Research;                                   Luminite Hamaxe & 1_Research_Wep;
+Researchsanity - Necroplasm;        Research | Calamity;                        Necroplasm & 100_Research_NTl;
+Researchsanity - Unholy Essence;    Research | Calamity;                        Unholy Essence & 25_Research;
 
 // Profaned Guardians
 Profaned Guardians;                 Calamity | Location | Item;                 ((@fargo & Mutant NPC & Profaned Guardians) | (Hardmode Anvil & Unholy Essence & Luminite Bar)) & @health(4);
@@ -678,6 +1048,9 @@ Voltage Regulation System;          Calamity;                                   
 Tarragon Armor;                     Calamity | Armor Minions(3);                Hardmode Anvil & Uelibloom Bar & Divine Geode;
 Necromantic Geode;                  Calamity;                                   #Ravager & Providence, the Profaned Goddess;
 Bloodstone;                         Calamity;                                   Providence, the Profaned Goddess | Necromantic Geode;
+Supreme Healing Potion;             Calamity;                                   ((Bottle | Alchemy Table) & Super Healing Potion & Bloodstone) | #Providence, the Profaned Goddess | #Ceaseless Void | #Storm Weaver | #Signus, Envoy of the Devourer | #Polterghast | #The Old Duke;
+Researchsanity - Uelibloom Ore [Calamity]; Research | Calamity;                 Uelibloom Ore & 100_Research_Til;
+Researchsanity - Uelibloom Bar [Calamity]; Research | Calamity;                 Uelibloom Bar & 25_Research;
 
 // Champions
 Sigil of Champions;                 Fargo;                                      (Mutant NPC & Eridanus, Champion of Cosmos) | (Ancient Manipulator & Hellstone Bar & Frost Core & Soul of Light & Soul of Night & Forbidden Fragment & Luminite Bar & (~@calamity | Divine Geode));
@@ -730,6 +1103,7 @@ Planebreaker's Pouch;               Calamity;                                   
 Nucleogenesis;                      Calamity;                                   (Cosmic Anvil & Star-Tainted Generator & Statis' Curse & Ascendant Spirit Essence) | (@getfixedboi & #Ceaseless Void);
 Nanotech;                           Calamity;                                   (Emblem & Vampiric Talisman & Electrician's Glove & Luminite Bar & Ascendant Spirit Essence) | (@getfixedboi & #Signus, Envoy of the Devourer);
 Ethereal Talisman;                  Calamity;                                   (Cosmic Anvil & Sigil of Calamitas & Mana Flower & Ascendant Spirit Essence) | (@getfixedboi & #Signus, Envoy of the Devourer);
+Omega Healing Potion;               Calamity;                                   ((Bottle | Alchemy Table) & Supreme Healing Potion & Ascendant Spirit Essence) | #Primordial Wyrm | #The Devourer of Gods | #Yharon, Dragon of Rebirth | #Exo Mechs | #Supreme Witch, Calamitas | (@getfixedboi & #Dragonfolly);
 Eridanus, Champion of Cosmos;       Fargo | Location | Item | Goal;             Sigil of Champions & @health(5);
 # eridanus_champion_of_cosmos
 Eridanium;                          Fargo;                                      #Eridanus, Champion of Cosmos;
@@ -750,7 +1124,7 @@ Infinity +1 Sword;                  Achievement | Crafting | Item(Has Zenith) | 
 // Abominationn
 Golden Dipping Vat;                 Fargo;                                      Pirate & Wall of Flesh;
 Elemental Assembler;                Fargo;                                      Dye Trader & Witch Doctor & Goblin Tinkerer & Dungeon & Hellforge & Steampunker & Solidifier & Evil Boss Part & Bone;
-Multitask Center;                   Fargo;                                      
+Multitask Center;                   Fargo;                                      Furnace & Anvil & Loom & Sawmill; // Everything else is quite simple.
 Decay Chamber;                      ;                                           Steampunker;
 Steampunk Boiler;                   ;                                           Steampunker & Eye of Cthulhu & Evil Boss & Skeletron;
 Meat Grinder;                       ;                                           Wall of Flesh;
@@ -935,7 +1309,7 @@ Brain Scrambler;                    ;                                           
 Green Horseshoe Balloon;            ;                                           Tinkerer's Workshop;
 Zephyr Boots;                       Fargo;                                      Tinkerer's Workshop & Terraspark Boots & Green Horseshoe Balloon & Deviating Energy;
 Angel Treads;                       Calamity;                                   Hardmode Anvil & Aerialite Bar & Essence of Sunlight & Soul of Fright & Soul of Might & Soul of Sight & Terraspark Boots & (~@fargo | Zephyr Boots);
-Amphibian Boots;                    ;                                           Tinkerer's Workshop;
+Amphibian Boots;                    ;                                           Tinkerer's Workshop & Frog Leg & Sailfish Boots;
 Fairy Boots;                        ;                                           Tinkerer's Workshop & Spectre Boots & Soul of Light;
 Aeolus Boots;                       Fargo;                                      Hardmode Anvil & Amphibian Boots & Fairy Boots & Deviating Energy & Zephyr Boots & (~@calamity | (Angel Treads & Living Shard));
 Moon Walkers;                       Calamity;                                   Ancient Manipulator & Soul of Flight & Luminite Bar & Angel Treads & (~@fargo | Aeolus Boots);
@@ -945,7 +1319,6 @@ Bundle of Horseshoe Balloons;       ;                                           
 Jetpack;                            ;                                           Steampunker & Wall of Flesh;
 MOAB;                               Calamity;                                   Hardmode Anvil & Bundle of Horseshoe Balloons & Jetpack & Soul of Fright & Soul of Might & Soul of Sight;
 Master Ninja Gear;                  ;                                           Tinkerer's Workshop & Wall of Flesh & Plantera & Dungeon;
-Frog Flipper;                       ;                                           Tinkerer's Workshop; 
 Statis' Ninja Belt;                 Calamity;                                   Hardmode Anvil & Master Ninja Gear & Frog Flipper & Purified Gel & Necroplasm;
 Statis' Void Sash;                  Calamity;                                   Cosmic Anvil & Statis' Ninja Belt & Twisting Nether & Nightmare Fuel;
 Folly Feed;                         Calamity;                                   #Dragonfolly;
@@ -973,10 +1346,7 @@ Ascendant Insignia;                 Calamity;                                   
 Silva Wings;                        Calamity;                                   Cosmic Anvil & Soul of Flight & Planty Mush & Effulgent Feather & Ascendant Spirit Essence;     
 Flight Mastery Soul;                Fargo;                                      Crucible of the Cosmos & Frozen Wings & Bone Wings & Harpy Wings & Fairy Wings & Bat Wings & Empress Wings & Fishron Wings & Betsy Wings & Festive Wings & Tattered Fairy Wings & Flame Wings & Soaring Insignia & Gravity Globe & Celestial Starboard & (~@calamity | (Tarragon Wings & Hadarian Wings & Skyline Wings & Ascendant Insignia & Silva Wings));
 
-Lavaproof Tackle Bag;               ;                                           Tinkerer's Workshop & ((@fargo & #Duke Fishron) | (Merchant & Angler));
-Chum Caster;                        ;                                           Blood Moon;
 Angler Enchantment;                 Fargo;                                      (#Duke Fishron | (Clothier & Angler)) & Lavaproof Tackle Bag & Chum Caster;
-Golden Fishing Rod;                 ;                                           (Merchant & Angler & Wall of Flesh) | (@fargo & (#Duke Fishron | #Banished Baron)) | (@calamity & Angler);
 Sitting Duck's Fishing Pole;        ;                                           Traveling Merchant & Skeletron;
 Spore Sac;                          ;                                           #Plantera;
 Volatile Gelatin;                   ;                                           #Queen Slime;
@@ -1000,8 +1370,6 @@ Hand Of Creation;                   ;                                           
 Toolbox;                            ;                                           Christmas | (@fargo & Goblin Tinkerer & Mechanic);
 Toolbelt;                           ;                                           Goblin Tinkerer;
 Drill Containment Unit;             Pickaxe(225);                               Hardmode Anvil & Luminite Bar & Chlorophyte Bar & Shroomite Bar & Spectre Bar & Hellstone Bar & Meteorite Bar;
-Royal Gel;                          ;                                           #King Slime;
-Scorched Bone;                      Calamity;                                   Molten Pickaxe | (@fargo & Lumberjack & Skeletron);
 Archaic Powder;                     Calamity;                                   Scorched Bone & Bone;
 Marnite Architect Enchantment;      Calamity | Fargo;
 Onyx Excavator Key;                 Calamity;                                   Wire;
@@ -1053,7 +1421,7 @@ Recon Scope;                        ;                                           
 Molten Quiver;                      ;                                           Tinkerer's Workshop & Magic Quiver & Magma Stone;
 Stalker's Quiver;                   ;                                           Tinkerer's Workshop & Magic Quiver;
 Dart Pistol;                        ;                                           Wall of Flesh;
-Megashark;                          ;                                           Hardmode Anvil & Arms Dealer & Illegal Gun Parts & Soul of Might;
+Megashark;                          ;                                           Hardmode Anvil & Arms Dealer & Illegal Gun Parts & Soul of Might & Shark Fin;
 Pulse Bow;                          ;                                           Hardmode Anvil & Shroomite Bar;
 Nail Gun;                           ;                                           Solar Eclipse & Plantera;
 Piranha Gun;                        ;                                           Dungeon & Jungle Key;

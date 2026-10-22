@@ -2,13 +2,15 @@
 
 import dataclasses
 import logging
+import math
+import random
 from typing import Union, Tuple, List, Dict, Set, override
 
 from Options import NumericOption
 from rule_builder.cached_world import CachedRuleBuilderWorld
 from rule_builder.field_resolvers import FromWorldAttr
 from worlds.AutoWorld import WebWorld, World
-from BaseClasses import Region, ItemClassification, Tutorial, CollectionState, Spoiler, MultiWorld
+from BaseClasses import Region, ItemClassification, Tutorial, CollectionState, Spoiler, MultiWorld, ThreadBarrierProxy
 from rule_builder.options import OptionFilter
 from rule_builder.rules import Has, HasAny, HasAll, True_, False_, And, Or, Rule, TWorld, HasFromList, Filtered
 from .Flags import (
@@ -41,7 +43,7 @@ from .Checks import (
     quarter_fruits,
 )
 from .Options import TerrariaOptions, Goal, ter_option_groups, RandomizeNPCs, Mods, RareAchievements, \
-    TimeAchievements, HealthLogic, Getfixedboi, ShimmerSkips
+    TimeAchievements, HealthLogic, Getfixedboi, ShimmerSkips, FishingLogic, Researchsanity, ResearchLockedBehindItems
 
 
 class TerrariaWeb(WebWorld):
@@ -141,6 +143,7 @@ class TerrariaWorld(CachedRuleBuilderWorld):
     def __init__(self, multiworld: MultiWorld, player: int):
         super().__init__(multiworld, player)
         self.progression = set()
+        self.useful_if_not_progression = set()
         self.npcs_to_randomize = set()
 
         self.ter_items: List[str]
@@ -169,6 +172,10 @@ class TerrariaWorld(CachedRuleBuilderWorld):
             "crafting_achievements": slot_data["crafting_achievements"],
             "grindy_achievements": slot_data["grindy_achievements"],
             "fishing_achievements": slot_data["fishing_achievements"],
+            "fishing_logic": slot_data["fishing_logic"],
+            "researchsanity": slot_data["researchsanity"],
+            "researchsanity_seed": slot_data["researchsanity_seed"],
+            "research_locked_behind_items": slot_data["research_locked_behind_items"],
             "fill_extra_checks_with": slot_data["fill_extra_checks_with"],
             "shimmer_skips": slot_data["shimmer_skips"],
             "health_logic": slot_data["health_logic"],
@@ -229,11 +236,19 @@ class TerrariaWorld(CachedRuleBuilderWorld):
                     f"SLOT {slot_name}: goal `{Goal.name_lookup[self.options.goal.value]}`, which requires Fargo, was selected with Fargo disabled; enabling Fargo"
                 )
                 self.options.mods.value.add("Fargo")
+            if self.options.fishing_achievements.value and not self.options.fishing_logic.value:
+                logging.warning(
+                    f"SLOT {slot_name}: Fishing Advancements are enabled but not Fishing Logic; enabling Fishing Logic"
+                )
+                self.options.fishing_logic.value = 1
 
             if "Npc" in flags:
                 event = location
             else:
-                event = flags.get("Item") or f"Post-{location}"
+                if ("Research" in flags or "ResearchItem" in flags):
+                    event = location
+                else:
+                    event = flags.get("Item") or f"Post-{location}"
             ter_goals[event] = location
             goal_items.add(event)
 
@@ -245,6 +260,8 @@ class TerrariaWorld(CachedRuleBuilderWorld):
                 incompatible_options.append("NPC Randomization")
             if "Fargo" in self.options.mods.value:
                 incompatible_options.append("Fargo")
+            if self.options.researchsanity.value > 0:
+                incompatible_options.append("Researchsanity")
 
             if incompatible_options:
                 logging.warning(f"SLOT {slot_name}: getfixedboi mode is enabled with the following incompatible options:\n"
@@ -262,12 +279,7 @@ class TerrariaWorld(CachedRuleBuilderWorld):
                 "Grax"
             })
 
-        location_count = 0
-        locations = []
-        item_count = 0
-        items = []
-
-        events = []
+        valid_rules = rules[:goal] if goal != 0 else rules
 
         def mark_progression(conditions):
             for condition in conditions:
@@ -292,7 +304,109 @@ class TerrariaWorld(CachedRuleBuilderWorld):
                             continue
                     mark_progression(conds)
 
-        valid_rules = rules[:goal] if goal != 0 else rules
+        # percentageOfSphereOne is an unchanging variable. Probably pretty easy to make this an option, but I figure I'll keep it this way for now. -NonIdiot
+        # to note, the "sphereOne" is not actually looking at requirements, but rather if it is tagged with the "SphereOneResearch" flag, which is only placed on locations that are GUARANTEED to be Sphere One (ignoring "Can Research") no matter the options. If added as an option, be sure to mention this in the YAML. -NonIdiot
+        percentageOfSphereOne = 15
+
+        # this for loop basically just fills the "potential_researchsanity_rules" list with non-"Item" Rules that are researchsanity ones.
+        potential_researchsanity_rules = []
+        removable_researchsanity_items = []
+        for rule in valid_rules:
+            if rule.name in self.disabled_rules:
+                continue
+
+            if invalid_flag(rule.flags, self.options) and rule.name not in goal_locations:
+                # very buggy. dont use this log -NonIdiot
+                #logging.info("Terraria (Beta) says (Code NonIdiot004): "+rule.name+" is invalid.")
+                continue
+            is_loc, is_item = is_location_is_item(rule.flags, self.options)
+
+            if rule.flags.__contains__("Research") or rule.flags.__contains__("ResearchItem"):
+                if is_loc:
+                    potential_researchsanity_rules.append(rule)
+                elif is_item:
+                    removable_researchsanity_items.append(rule)
+                    
+        # can i use "self.options.researchsanity" instead of "self.options.researchsanity.value > 0"? the world may never know... -NonIdiot
+        if self.options.researchsanity.value > 0:
+            # if seed is 0, make it not 0. hopefully this never occurs during UT fake gen, but if it does and it causes errors, i can just self.is_ut.
+            if self.options.researchsanity_seed.value == 0:
+                self.options.researchsanity_seed.value = self.random.randrange(1,999999)
+
+            # then it gets shuffled via the function
+            potential_researchsanity_rules = self.shuffle_with_seed(potential_researchsanity_rules,self.options.researchsanity_seed.value)
+
+            # and it is split between two Lists
+            potential_researchsanity_sphereone_rules = []
+            potential_researchsanity_nonsphereone_rules = []
+            for rule in potential_researchsanity_rules:
+                if "SphereOneResearch" in rule.flags:
+                    potential_researchsanity_sphereone_rules.append(rule)
+                else:
+                    potential_researchsanity_nonsphereone_rules.append(rule)
+            
+            # sphere one is removed first (to note, ceil is used on sphereOne and floor is used on nonSphereOne)
+            sphereOneWanted = math.ceil(self.options.researchsanity.value*(percentageOfSphereOne/100))
+            sphereOnePossible = len(potential_researchsanity_sphereone_rules)
+            sphereOneRemoved = 0
+            sphereOneToPutInLog = []
+            if (sphereOneWanted < sphereOnePossible):
+                for num in range(0,sphereOneWanted):
+                    sphereOneToPutInLog.append(str(potential_researchsanity_sphereone_rules[num].name).removeprefix("Researchsanity - "))
+                for num in range(sphereOneWanted,sphereOnePossible):
+                    sphereOneRemoved += 1
+                    self.disabled_rules.update({potential_researchsanity_sphereone_rules[num].name})
+            else:
+                for num in range(0,sphereOnePossible):
+                    sphereOneToPutInLog.append(str(potential_researchsanity_sphereone_rules[num].name).removeprefix("Researchsanity - "))
+
+            # then non-sphere one
+            nonSphereOneWanted = math.floor(self.options.researchsanity.value*((100-percentageOfSphereOne)/100))
+            nonSphereOnePossible = len(potential_researchsanity_nonsphereone_rules)
+            nonSphereOneRemoved = 0
+            nonSphereOneToPutInLog = []
+            if (nonSphereOneWanted < nonSphereOnePossible):
+                for num in range(0,nonSphereOneWanted):
+                    nonSphereOneToPutInLog.append(str(potential_researchsanity_nonsphereone_rules[num].name).removeprefix("Researchsanity - "))
+                for num in range(nonSphereOneWanted,nonSphereOnePossible):
+                    nonSphereOneRemoved += 1
+                    self.disabled_rules.update({potential_researchsanity_nonsphereone_rules[num].name})
+            else:
+                for num in range(0,nonSphereOnePossible):
+                    nonSphereOneToPutInLog.append(str(potential_researchsanity_nonsphereone_rules[num].name).removeprefix("Researchsanity - "))
+
+            # now, we classify all the AP items
+            # never mind, that's done right before pointless_events now
+            rules_set_progression = 0
+            #totalChecksThere = min(sphereOneWanted,sphereOnePossible)+min(nonSphereOneWanted,nonSphereOnePossible)
+
+
+            # this is used to debug the Researchsanity functionality. uncomment if you are working on something researchsanity-related. -NonIdiot
+            logging.info("Terraria (Beta) says (Code NonIdiot001):"\
+                         +"\nFor Researchsanity"\
+                         +"\nPotential Locations: "+str(len(potential_researchsanity_rules))\
+                         +"\nRemovable Items: "+str(len(removable_researchsanity_items))\
+                         +"\nAmount of Sphere One that YAML wants: "+str(sphereOneWanted)\
+                         +"\nAmount of possible Sphere One Locations: "+str(sphereOnePossible)\
+                         +"\nAmount of Sphere One Locations Disabled: "+str(sphereOneRemoved)\
+                         +"\nAmount of Non-Sphere One that YAML wants: "+str(nonSphereOneWanted)\
+                         +"\nAmount of possible Non-Sphere One Locations: "+str(nonSphereOnePossible)\
+                         +"\nAmount of Non-Sphere One Locations Disabled: "+str(nonSphereOneRemoved)\
+                         +"\nSeed Used: "+str(self.options.researchsanity_seed.value)\
+                         +"\nrules_set_progression: "+str(rules_set_progression)\
+                         +"\nAll Sphere One Locations Allowed (Length "+str(len(sphereOneToPutInLog))+"): "+str(", ".join(sphereOneToPutInLog))\
+                         +"\nAll Non-Sphere One Locations Allowed (Length "+str(len(nonSphereOneToPutInLog))+"): "+str(", ".join(nonSphereOneToPutInLog))\
+                         )
+
+            
+
+        location_count = 0
+        locations = []
+        item_count = 0
+        items = []
+
+        events = []
+
         for rule in valid_rules:
             early = "Early" in rule.flags
             rare = "Rare" in rule.flags
@@ -300,6 +414,7 @@ class TerrariaWorld(CachedRuleBuilderWorld):
             crafting = "Crafting" in rule.flags
             grindy = "Grindy" in rule.flags
             fishing = "Fishing" in rule.flags
+            research = "Research" in rule.flags
             
             if rule.name in self.disabled_rules:
                 continue
@@ -325,6 +440,9 @@ class TerrariaWorld(CachedRuleBuilderWorld):
 
             is_loc, is_item = is_location_is_item(rule.flags, self.options)
 
+            # useful for logging what is and isn't an item/location. fills up the generation log a TON though.
+            #logging.info("Terraria (Beta) says (Code NonIdiot002) "+rule.name+": Is a location? "+str(is_loc)+" Is an item?"+str(is_item))
+
             if is_loc:
                 location_count += 1
                 locations.append(rule.name)
@@ -344,7 +462,52 @@ class TerrariaWorld(CachedRuleBuilderWorld):
 
 
 
-        pointless_events = [event for event in events if loc_to_item[event] not in self.progression]
+        # this is here to make sure all items fit. totalChecksThere is set to location_count minus the amount of non-"Can Research" items.
+        totalChecksThere = location_count-(item_count-20)
+        rules_set_progression = 0
+        if (totalChecksThere<18 or self.options.research_locked_behind_items.value < 3):
+            # if there are less than enough for the FULL list of categories, it is truncated to 3 of the somewhat-biggest, and a combination of the rest, totalling 4.
+            do_progression_instead = ["Can Research Stackable Items","Can Research 1-To-Research Accessories","Can Research 1-To-Research Weapons","Can Research 1-To-Research Other Items"]
+            if (totalChecksThere<4 or self.options.research_locked_behind_items.value < 2):
+                # however, if theres not even enough for those 4, it just packs everything into one item. it's not like it'll bring a bunch of locations in logic at once, right?
+                do_progression_instead = ["Can Research All Items"]
+                if (totalChecksThere<1 or self.options.research_locked_behind_items.value == 0):
+                    # and if it specifically doesn't want ANY researching locked, it does THIS.
+                    do_progression_instead = []
+            # then its removal time
+            for num in range(0,len(removable_researchsanity_items)):
+                if (removable_researchsanity_items[num].name in do_progression_instead):
+                    self.useful_if_not_progression.update({removable_researchsanity_items[num].name})
+                else:
+                    items.remove(removable_researchsanity_items[num].name)
+                    item_count -= 1
+            rules_set_progression = -1*len(do_progression_instead)
+        else:
+            # but if there IS enough room, just go as usual.
+            for rule in valid_rules:
+                if rule.name in self.disabled_rules:
+                    continue
+    
+                if invalid_flag(rule.flags, self.options) and rule.name not in goal_locations:
+                    continue
+
+                # disables these two items, as the other 18 items are present
+                if rule.name == "Can Research All Items" or rule.name == "Can Research Stackable Items":
+                    items.remove(rule.name)
+                    item_count -= 1
+                    continue
+
+                if rule.flags.__contains__("ResearchItem"):
+                    self.useful_if_not_progression.update({rule.name})
+                    rules_set_progression += 1
+                # make sure the item isn't removed by pointless_events,
+                #if rule.flags.__contains__("ResearchGroup"):#rule.flags.__contains__("Research") or 
+                #    mark_progression(rule.conditions)
+                #    # then only TRULY mark the items as progression or useful.
+        # useful for debugging how many items are removed by the above function -NonIdiot
+        #logging.info("Terraria (Beta) says (Code NonIdiot005) "+str(totalChecksThere)+" "+str(self.options.research_locked_behind_items.value)+" "+str(rules_set_progression))
+
+        pointless_events = [event for event in events if (loc_to_item[event] not in self.progression and event not in self.useful_if_not_progression)]
         for event in pointless_events:
             locations.remove(event)
             items.remove(loc_to_item[event])
@@ -371,7 +534,8 @@ class TerrariaWorld(CachedRuleBuilderWorld):
             if ("Calamity" in self.options.mods.value or "Calamity" not in rewards[reward])
             and ("Fargo" in self.options.mods.value or "Fargo" not in rewards[reward])
         ]
-        self.multiworld.random.shuffle(random_rewards)
+        # better to have this as self.random instead of self.multiworld.random -NonIdiot
+        self.random.shuffle(random_rewards)
         while (
                 self.options.fill_extra_checks_with.value == 1
                 and item_count < location_count
@@ -412,6 +576,8 @@ class TerrariaWorld(CachedRuleBuilderWorld):
     def create_item(self, item: str) -> TerrariaItem:
         if item in self.progression or item == self.OUT_OF_LOGIC:
             classification = ItemClassification.progression
+        elif item in self.useful_if_not_progression:
+            classification = ItemClassification.useful
         else:
             classification = ItemClassification.filler
 
@@ -422,7 +588,10 @@ class TerrariaWorld(CachedRuleBuilderWorld):
             if (rule_index := rule_indices.get(item)) is not None:
                 rule = rules[rule_index]
                 if "Item" in rule.flags:
-                    name = rule.flags.get("Item") or f"Post-{item}"
+                    if ("Research" in rule.flags or "ResearchItem" in rule.flags):
+                        name = item
+                    else:
+                        name = rule.flags.get("Item") or f"Post-{item}"
                 elif "Npc" in rule.flags and self.options.randomize_npcs.value == 1:
                     name = item
                 else:
@@ -437,6 +606,7 @@ class TerrariaWorld(CachedRuleBuilderWorld):
         for location in self.ter_locations:
             rule = rules[rule_indices[location]]
             if "Location" not in rule.flags and "Achievement" not in rule.flags \
+                    and not ("Research" in rule.flags and self.options.researchsanity.value) \
                     and not ("Npc" in rule.flags and self.options.randomize_npcs.value):
                 if location in self.progression:
                     classification = ItemClassification.progression
@@ -481,7 +651,10 @@ class TerrariaWorld(CachedRuleBuilderWorld):
             
             rule = rules[rule_indices[condition.condition]]
             if "Item" in rule.flags:
-                name = rule.flags.get("Item") or f"Post-{condition.condition}"
+                if ("Research" in rule.flags or "ResearchItem" in rule.flags):
+                    name = condition.condition
+                else:
+                    name = rule.flags.get("Item") or f"Post-{condition.condition}"
             else:
                 name = condition.condition
 
@@ -572,6 +745,20 @@ class TerrariaWorld(CachedRuleBuilderWorld):
                 return True_(options=[OptionFilter(Getfixedboi, condition.sign)])
             elif condition.condition == "shimmer_skips":
                 return True_(options=[OptionFilter(ShimmerSkips, condition.sign)])
+            elif condition.condition == "fishing":
+                return True_(options=[OptionFilter(FishingLogic, condition.sign)])
+            elif condition.condition == "researchsanity":
+                if condition.sign:
+                    # SHOULD return false if Researchsanity==0
+                    return False_(options=[OptionFilter(Researchsanity, 0)])
+                else:
+                    return True_(options=[OptionFilter(Researchsanity, 0)])
+            elif condition.condition == "research_items":
+                if condition.sign:
+                # SHOULD return false if ResearchLockedBehindItems==0
+                    return False_(options=[OptionFilter(ResearchLockedBehindItems, 0)])
+                else:
+                    return True_(options=[OptionFilter(ResearchLockedBehindItems, 0)])
             else:
                 raise Exception(f"Unknown function {condition.condition}")
         elif condition.type == COND_GROUP:
@@ -613,11 +800,34 @@ class TerrariaWorld(CachedRuleBuilderWorld):
             "crafting_achievements": self.options.crafting_achievements.value,
             "grindy_achievements": self.options.grindy_achievements.value,
             "fishing_achievements": self.options.fishing_achievements.value,
+            "fishing_logic": self.options.fishing_logic.value,
+            "researchsanity": self.options.researchsanity.value,
+            "researchsanity_seed": self.options.researchsanity_seed.value,
+            "research_locked_behind_items": self.options.research_locked_behind_items.value,
             "fill_extra_checks_with": self.options.fill_extra_checks_with.value,
             "shimmer_skips": self.options.shimmer_skips.value,
             "health_logic": self.options.health_logic.value,
             "health_logic_handicap": self.options.health_logic_handicap.value,
         }
+        
+    def shuffle_with_seed(self, array: list, seed: int = None) -> list:
+        if seed is None:
+            seed = random.randint(1, 0xFFFE)
+
+        randome = ThreadBarrierProxy(random.Random(seed))
+        shuffled = array
+        randome.shuffle(array)
+        return shuffled
+
+        #length_ = len(array)
+        #shuffled = [0]*length_
+        #seed_pos = seed ^ 0xFFFF
+
+        #for i in list(reversed(range(length_))):
+        #    index = seed_pos % (i + 1)
+        #    shuffled[i] = array.pop(index)
+
+        #return shuffled
 
 @dataclasses.dataclass()
 class HasMinion(Rule["TerrariaWorld"], game=TerrariaWorld.game):

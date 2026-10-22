@@ -32,6 +32,10 @@ rule_flags = [
     "Shimmer",  # Unique flag for Aether access + shimmer logic
     "Health",
     "Quarter Fruit",
+    "Research",
+    "SphereOneResearch", # could probably be consolidated so that these ones ALSO disappear when researchsanity is off, but oh well
+    "ResearchGroup",
+    "ResearchItem",
 ]
 
 # Flags that indicate the attached event may be necessary for progression
@@ -80,7 +84,13 @@ def invalid_flag(flags: List[str], options: TerrariaOptions):
             case "Grindy":
                 valid_flag = options.grindy_achievements.value
             case "Fishing":
-                valid_flag = options.fishing_achievements.value
+                valid_flag = options.fishing_achievements.value or options.fishing_logic.value
+            case "Research":
+                valid_flag = options.researchsanity.value > 0
+            case "ResearchGroup":
+                valid_flag = options.researchsanity.value > 0 or options.research_locked_behind_items > 0
+            case "ResearchItem":
+                valid_flag = options.research_locked_behind_items > 0
         if not valid_flag:
             return True
     return False
@@ -93,7 +103,8 @@ def is_location_is_item(flags: List[str], options: TerrariaOptions) -> Tuple[boo
 
 def is_location_only(flags: List[str]) -> bool:
     return ("Location" in flags
-            or "Achievement" in flags)
+            or "Achievement" in flags
+            or ("Research" in flags and (not "Item" in flags)))
 
 def is_item_only(flags: List[str]) -> bool:
     return "Item" in flags

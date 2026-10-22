@@ -22,6 +22,7 @@ class Getfixedboi(Toggle):
     - Princess goal enabled
     - NPC Rando enabled
     - Fargo's Souls enabled
+    - Researchsanity enabled
     If any of these apply, Getfixedboi will automatically be disabled during generation.
     """
 
@@ -96,7 +97,7 @@ class RandomizeNPCs(Toggle):
 
 
 class EarlyAchievements(DefaultOnToggle):
-    """Adds checks upon collecting early Pre-Hardmode achievements. Adds many sphere 1 checks."""
+    """If normal_achievements is enabled, adds checks upon collecting early Pre-Hardmode achievements. Adds many sphere 1 checks."""
 
     display_name = "Early Pre-Hardmode Achievements"
 
@@ -111,35 +112,72 @@ class NormalAchievements(DefaultOnToggle):
 
 
 class RareAchievements(Toggle):
-    """Adds checks upon collecting grindy achievements involving rare enemies/drops"""
+    """If normal_achievements is enabled, adds checks upon collecting grindy achievements involving rare enemies/drops"""
 
     display_name = "Rare Achievements"
 
 
 class TimeAchievements(Toggle):
     """
-    Adds checks upon collecting grindy achievements based on random time-based events, such as windy weather
+    If normal_achievements is enabled, adds checks upon collecting grindy achievements based on random time-based events, such as windy weather
     """
 
     display_name = "Time-based Achievements"
 
 
 class CraftingAchievements(Toggle):
-    """Adds checks upon collecting grindy achievements dedicated to crafting complex items"""
+    """If normal_achievements is enabled, adds checks upon collecting grindy achievements dedicated to crafting complex items"""
 
     display_name = "Crafting Achievements"
 
 
 class GrindyAchievements(Toggle):
-    """Adds checks upon collecting grindy achievements that otherwise require a lot of repetitive work"""
+    """If normal_achievements is enabled, adds checks upon collecting grindy achievements that otherwise require a lot of repetitive work"""
 
     display_name = "Grindy Achievements"
 
 
 class FishingAchievements(Toggle):
-    """Adds checks upon collecting fishing quest achievements"""
+    """If normal_achievements is enabled, adds checks upon collecting fishing quest achievements"""
 
     display_name = "Fishing Quest Achievements"
+
+
+class Researchsanity(Range):
+    """
+    If set to a number above 0, this makes researching certain ingame items be AP locations.
+    They are randomly selected out of a curated list, with a certain percentage guaranteed to be
+    in Sphere 1. If set to a value above the amount of potential AP locations, it is reduced to
+    however many are possible.
+    """
+    display_name = "Researchsanity"
+    range_start = 0
+    range_end = 1000
+    default = 0
+
+
+class ResearchsanitySeed(Range):
+    """
+    If Researchsanity is enabled, this is the random seed that determines which ingame items are
+    chosen to be AP locations. If set to 0, it will choose a random number.
+    """
+    display_name = "Researchsanity Seed"
+    range_start = 0
+    range_end = 999999
+    default = 0
+
+class ResearchLockedBehindItems(Choice):
+    """
+    This locks the ability to research certain types of items behind items.
+    If there are not enough locations to account for them, they are reduced in order to allow for all progression.
+    (These items are prioritized over the "Fill Extra Checks With" below.)
+    """
+    display_name = "Research Locked Behind Items"
+    option_off = 0
+    option_one_item_max = 1
+    option_four_items_max = 2
+    option_most_possible = 3
+    default = 3
 
 
 class FillExtraChecksWith(Choice):
@@ -183,6 +221,12 @@ class HealthLogicHandicap(Range):
     default = 0
 
 
+class FishingLogic(Toggle):
+    """Considers fishing for obtaining certain resources. Automatically enabled if fishing_advancements is enabled."""
+
+    display_name = "Fishing Logic"
+
+
 class CompressedPlaythrough(DefaultOnToggle):
     """
     Turn this on if you want the playthrough in the spoiler log to be compressed so it only shows the locations.
@@ -207,6 +251,9 @@ ter_option_groups = [
         CraftingAchievements,
         GrindyAchievements,
         FishingAchievements,
+        Researchsanity,
+        ResearchsanitySeed,
+        ResearchLockedBehindItems,
     ]),
     OptionGroup("Items", [
         FillExtraChecksWith,
@@ -215,6 +262,7 @@ ter_option_groups = [
         ShimmerSkips,
         HealthLogic,
         HealthLogicHandicap,
+        FishingLogic,
     ]),
 ]
 
@@ -232,6 +280,10 @@ class TerrariaOptions(PerGameCommonOptions):
     crafting_achievements: CraftingAchievements
     grindy_achievements: GrindyAchievements
     fishing_achievements: FishingAchievements
+    fishing_logic: FishingLogic
+    researchsanity: Researchsanity
+    researchsanity_seed: ResearchsanitySeed
+    research_locked_behind_items: ResearchLockedBehindItems
     fill_extra_checks_with: FillExtraChecksWith
     shimmer_skips: ShimmerSkips
     health_logic: HealthLogic

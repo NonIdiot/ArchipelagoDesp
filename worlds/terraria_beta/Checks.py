@@ -85,7 +85,8 @@ def tokens(rule: str) -> List[Tuple[int, int, Union[str, int, None]]]:
         else:
             if token == "":
                 token_index = index
-            token += char
+            token = str(token) + char
+            #token += char
 
     add_token(token_list, token, token_index)
     return token_list
@@ -240,6 +241,9 @@ def validate_conditions(
                 "getfixedboi",
                 "shimmer_skips",
                 "health",
+                "fishing",
+                "researchsanity",
+                "research_items",
             }:
                 raise Exception(
                     f"function `{condition.condition}` in `{rule}` is not defined"
@@ -521,7 +525,7 @@ def read_data() -> Tuple[
                 else:
                     unexpected(line, char, id, token, pos, POS_FMT, "Rules.dsv")
             elif pos == END:
-                unexpected(line, char, id, token, pos)
+                unexpected(line, char, id, token, pos, POS_FMT, "Rules.dsv")
             elif pos == GOAL:
                 if id == IDENT:
                     goal = token
@@ -547,7 +551,9 @@ def read_data() -> Tuple[
                     )
 
             if "Item" in flags:
-                item_name = flags["Item"] or f"Post-{name}"
+                item_name = name
+                if not "Research" in flags and not "ResearchItem" in flags:
+                    item_name = flags["Item"] or f"Post-{name}"
                 if item_name in item_name_to_id:
                     raise Exception(
                         f"item `{item_name}` on line `{line + 1}` shadows a previous item"
@@ -680,7 +686,7 @@ def read_data() -> Tuple[
                     unexpected(line, char, id, token, pos, RWD_POS_FMT, "Rewards.dsv")
 
         if pos != RWD_NAME and pos != RWD_FLAG and pos != RWD_END:
-            unexpected(line, char + 1, END_OF_LINE, None, pos)
+            unexpected(line, char + 1, END_OF_LINE, None, pos, POS_FMT, "Rules.dsv")
 
         if reward:
             if reward in rewards:
@@ -708,7 +714,7 @@ def read_data() -> Tuple[
     location_name_to_id = {}
 
     for rule in rules:
-        if "Location" in rule.flags or "Achievement" in rule.flags or "Npc" in rule.flags:
+        if "Location" in rule.flags or "Achievement" in rule.flags or "Npc" in rule.flags or "Research" in rule.flags:
             if rule.name in location_name_to_id:
                 raise Exception(f"location `{rule.name}` shadows a previous location")
             location_name_to_id[rule.name] = next_id
