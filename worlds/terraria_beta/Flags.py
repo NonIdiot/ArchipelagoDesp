@@ -6,6 +6,7 @@ from .Options import TerrariaOptions
 rule_flags = [
     "Location",  # Standard core locations
     "Item",  # Standard core items
+    "Progressive Item",
     "Goal",
     "Early",  # Achievement + logic modifier
     "Achievement",
@@ -29,9 +30,9 @@ rule_flags = [
     "Not Calamity Getfixedboi",
     "Fargo",
     "Not Fargo",
-    "Shimmer",  # Unique flag for Aether access + shimmer logic
     "Health",
     "Quarter Fruit",
+    "Depth",
     "Research",
     "SphereOneResearch", # could probably be consolidated so that these ones ALSO disappear when researchsanity is off, but oh well
     "ResearchGroup",
@@ -41,6 +42,7 @@ rule_flags = [
 # Flags that indicate the attached event may be necessary for progression
 special_events = [
     "Npc",
+    "Depth",
     "Pet",
     "Pickaxe",
     "Hammer",
@@ -69,8 +71,6 @@ def invalid_flag(flags: List[str], options: TerrariaOptions):
                 valid_flag = "Fargo" in options.mods.value
             case "Not Fargo":
                 valid_flag = "Fargo" not in options.mods.value
-            case "Shimmer":
-                valid_flag = options.shimmer_skips.value
             case "Early":
                 valid_flag = options.early_achievements.value
             case "Achievement":
@@ -85,6 +85,8 @@ def invalid_flag(flags: List[str], options: TerrariaOptions):
                 valid_flag = options.grindy_achievements.value
             case "Fishing":
                 valid_flag = options.fishing_achievements.value or options.fishing_logic.value
+            case "Depth":
+                valid_flag = options.randomize_depth.value
             case "Research":
                 valid_flag = options.researchsanity.value > 0
             case "ResearchGroup":
@@ -95,16 +97,22 @@ def invalid_flag(flags: List[str], options: TerrariaOptions):
             return True
     return False
 
-def is_location_is_item(flags: List[str], options: TerrariaOptions) -> Tuple[bool, bool]:
-    if "Npc" in flags and options.randomize_npcs.value == 1:
+def is_location_is_item(flags: List[str], options: TerrariaOptions | None = None) -> Tuple[bool, bool]:
+    if "Npc" in flags and (bool(options.randomize_npcs.value) if options else True):
         return True, True
     else:
-        return is_location_only(flags), is_item_only(flags)
+        return is_location_only(flags, options), is_item_only(flags)
 
-def is_location_only(flags: List[str]) -> bool:
-    return ("Location" in flags
-            or "Achievement" in flags
-            or ("Research" in flags and (not "Item" in flags)))
+def is_location_only(flags: List[str], options: TerrariaOptions | None = None) -> bool:
+    for flag in flags:
+        match flag:
+            case "Location":
+                return True
+            case "Achievement":
+                return True
+            case "Research":
+                return (not "Item" in flags)
+    return False
 
 def is_item_only(flags: List[str]) -> bool:
-    return "Item" in flags
+    return "Item" in flags or "Progressive Item" in flags
